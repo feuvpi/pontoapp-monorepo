@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>PontoAPP.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="MediatR" Version="13.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.21" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PGE.Modelo.ERP">
+      <HintPath>..\..\pge.modelos\PGE.Modelo.ERP\bin\Debug\net8.0\PGE.Modelo.ERP.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PontoAPP.Domain\PontoAPP.Domain.csproj" />
+    <ProjectReference Include="..\PontoAPP.Infrastructure\PontoAPP.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Commands\TimeRecords\CloclOutCommand.cs" />
+  </ItemGroup>
+
+</Project>
