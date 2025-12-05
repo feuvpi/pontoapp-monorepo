@@ -1,4 +1,3 @@
-// lib/core/theme/app_colors.dart
 import 'package:flutter/material.dart';
 
 abstract class AppColors {
@@ -26,4 +25,9 @@ abstract class AppColors {
   // Neumorphism
   static const Color shadowLight = Color(0xFFFFFFFF);
   static const Color shadowDark = Color(0xFFD1D9E6);
+
+    // Border
+  static const Color border = Color(0xFFE2E8F0);
+  static const Color borderLight = Color(0xFFF1F5F9);
+
 }
