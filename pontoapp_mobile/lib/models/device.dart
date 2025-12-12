@@ -49,5 +49,7 @@ class RegisterDeviceRequest {
     this.pushToken,
   });
 
+  factory RegisterDeviceRequest.fromJson(Map<String, dynamic> json) =>
+      _$RegisterDeviceRequestFromJson(json);
   Map<String, dynamic> toJson() => _$RegisterDeviceRequestToJson(this);
 }

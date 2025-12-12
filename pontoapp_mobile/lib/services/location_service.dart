@@ -1,7 +1,7 @@
 // lib/core/services/location_service.dart
 import 'package:dartz/dartz.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:pontoapp_mobile/core/errors/failres.dart';
+import 'package:pontoapp_mobile/core/errors/failures.dart';
 
 class LocationService {
   Future<Either<Failure, Position>> getCurrentPosition() async {

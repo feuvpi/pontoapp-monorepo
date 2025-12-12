@@ -34,6 +34,8 @@ class LoginRequest {
 
   LoginRequest({required this.email, required this.password});
 
+  factory LoginRequest.fromJson(Map<String, dynamic> json) =>
+      _$LoginRequestFromJson(json);
   Map<String, dynamic> toJson() => _$LoginRequestToJson(this);
 }
 
@@ -51,4 +53,5 @@ class LoginResponse {
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>
       _$LoginResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$LoginResponseToJson(this);
 }

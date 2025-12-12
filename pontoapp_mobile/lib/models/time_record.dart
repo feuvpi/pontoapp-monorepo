@@ -31,7 +31,6 @@ class TimeRecord {
 
   factory TimeRecord.fromJson(Map<String, dynamic> json) =>
       _$TimeRecordFromJson(json);
-
   Map<String, dynamic> toJson() => _$TimeRecordToJson(this);
 
   bool get isClockIn => type == 'ClockIn';
@@ -62,6 +61,7 @@ class DailySummary {
 
   factory DailySummary.fromJson(Map<String, dynamic> json) =>
       _$DailySummaryFromJson(json);
+  Map<String, dynamic> toJson() => _$DailySummaryToJson(this);
 
   bool get isWorking => currentStatus == 'Trabalhando';
 }
@@ -82,5 +82,7 @@ class ClockRequest {
     this.notes,
   });
 
+  factory ClockRequest.fromJson(Map<String, dynamic> json) =>
+      _$ClockRequestFromJson(json);
   Map<String, dynamic> toJson() => _$ClockRequestToJson(this);
 }

@@ -1,7 +1,7 @@
 // lib/core/services/biometric_service.dart
 import 'package:dartz/dartz.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:pontoapp_mobile/core/errors/failres.dart';
+import 'package:pontoapp_mobile/core/errors/failures.dart';
 
 class BiometricService {
   final LocalAuthentication _localAuth = LocalAuthentication();

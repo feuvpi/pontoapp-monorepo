@@ -1,12 +1,11 @@
-// lib/services/time_record_service.dart
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:pontoapp/core/network/api_client.dart';
-import 'package:pontoapp/core/services/biometric_service.dart';
-import 'package:pontoapp/core/services/device_info_service.dart';
-import 'package:pontoapp/core/services/location_service.dart';
-import 'package:pontoapp/core/errors/failures.dart';
-import 'package:pontoapp/models/time_record.dart';
+import 'package:pontoapp_mobile/core/errors/failures.dart';
+import 'package:pontoapp_mobile/core/network/api_client.dart';
+import 'package:pontoapp_mobile/models/time_record.dart';
+import 'package:pontoapp_mobile/services/biometric_service.dart';
+import 'package:pontoapp_mobile/services/device_info_service.dart';
+import 'package:pontoapp_mobile/services/location_service.dart';
 
 class TimeRecordService {
   final ApiClient _api;

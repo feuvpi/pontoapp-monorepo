@@ -20,12 +20,13 @@ class _ApiClient implements ApiClient {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<InvalidType> login(InvalidType request) async {
+  Future<LoginResponse> login(LoginRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
-    final _options = _setStreamType<InvalidType>(
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<LoginResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -36,9 +37,9 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late InvalidType _value;
+    late LoginResponse _value;
     try {
-      _value = InvalidType.fromJson(_result.data!);
+      _value = LoginResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -47,12 +48,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<InvalidType> clockIn(InvalidType request) async {
+  Future<TimeRecord> clockIn(ClockRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
-    final _options = _setStreamType<InvalidType>(
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<TimeRecord>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -63,9 +65,9 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late InvalidType _value;
+    late TimeRecord _value;
     try {
-      _value = InvalidType.fromJson(_result.data!);
+      _value = TimeRecord.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -74,12 +76,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<InvalidType> clockOut(InvalidType request) async {
+  Future<TimeRecord> clockOut(ClockRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
-    final _options = _setStreamType<InvalidType>(
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<TimeRecord>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -90,9 +93,9 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late InvalidType _value;
+    late TimeRecord _value;
     try {
-      _value = InvalidType.fromJson(_result.data!);
+      _value = TimeRecord.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -101,13 +104,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<InvalidType> getDailySummary(String? date) async {
+  Future<DailySummary> getDailySummary(String? date) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'date': date};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<InvalidType>(
+    final _options = _setStreamType<DailySummary>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -118,9 +121,9 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late InvalidType _value;
+    late DailySummary _value;
     try {
-      _value = InvalidType.fromJson(_result.data!);
+      _value = DailySummary.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -129,7 +132,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<InvalidType>> getMyRecords(
+  Future<List<TimeRecord>> getMyRecords(
     String? startDate,
     String? endDate,
   ) async {
@@ -141,7 +144,7 @@ class _ApiClient implements ApiClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<InvalidType>>(
+    final _options = _setStreamType<List<TimeRecord>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -152,10 +155,10 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<InvalidType> _value;
+    late List<TimeRecord> _value;
     try {
       _value = _result.data!
-          .map((dynamic i) => InvalidType.fromJson(i as Map<String, dynamic>))
+          .map((dynamic i) => TimeRecord.fromJson(i as Map<String, dynamic>))
           .toList();
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
@@ -165,12 +168,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<InvalidType> registerDevice(InvalidType request) async {
+  Future<Device> registerDevice(RegisterDeviceRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
-    final _options = _setStreamType<InvalidType>(
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<Device>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -181,9 +185,9 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late InvalidType _value;
+    late Device _value;
     try {
-      _value = InvalidType.fromJson(_result.data!);
+      _value = Device.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -192,12 +196,12 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<InvalidType>> getMyDevices() async {
+  Future<List<Device>> getMyDevices() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<InvalidType>>(
+    final _options = _setStreamType<List<Device>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -208,10 +212,10 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<InvalidType> _value;
+    late List<Device> _value;
     try {
       _value = _result.data!
-          .map((dynamic i) => InvalidType.fromJson(i as Map<String, dynamic>))
+          .map((dynamic i) => Device.fromJson(i as Map<String, dynamic>))
           .toList();
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);

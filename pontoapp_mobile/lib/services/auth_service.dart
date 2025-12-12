@@ -1,13 +1,14 @@
-// lib/services/auth_service.dart
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:pontoapp/core/network/api_client.dart';
-import 'package:pontoapp/core/constants/storage_keys.dart';
-import 'package:pontoapp/core/errors/failures.dart';
-import 'package:pontoapp/core/services/device_info_service.dart';
-import 'package:pontoapp/models/user.dart';
-import 'package:pontoapp/models/device.dart';
+import 'package:pontoapp_mobile/core/constants/storage_keys.dart';
+import 'package:pontoapp_mobile/core/errors/failures.dart';
+import 'package:pontoapp_mobile/core/network/api_client.dart';
+import 'package:pontoapp_mobile/models/device.dart';
+import 'package:pontoapp_mobile/models/user.dart';
+import 'package:pontoapp_mobile/services/device_info_service.dart';
+
 
 class AuthService {
   final ApiClient _api;

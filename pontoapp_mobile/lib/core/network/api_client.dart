@@ -1,6 +1,8 @@
-// lib/core/network/api_client.dart
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:pontoapp_mobile/models/user.dart';
+import 'package:pontoapp_mobile/models/time_record.dart';
+import 'package:pontoapp_mobile/models/device.dart';
 
 part 'api_client.g.dart';
 
