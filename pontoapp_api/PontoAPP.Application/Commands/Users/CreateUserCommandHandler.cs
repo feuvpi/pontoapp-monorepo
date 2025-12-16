@@ -20,14 +20,14 @@ public class CreateUserCommandHandler(
         logger.LogInformation("Creating user: {Email} for tenant: {TenantId}", request.Email, request.TenantId);
 
         // Validate email uniqueness within tenant
-        if (await userRepository.EmailExistsAsync(request.Email, cancellationToken))
+        if (await userRepository.EmailExistsInTenantAsync(request.Email))
         {
             throw new ValidationException($"Email '{request.Email}' já está em uso neste tenant.");
         }
 
         // Validate employee code uniqueness if provided
         if (!string.IsNullOrEmpty(request.EmployeeCode) &&
-            await userRepository.EmployeeCodeExistsAsync(request.EmployeeCode, cancellationToken))
+            await userRepository.EmployeeCodeExistsAsync(request.EmployeeCode))
         {
             throw new ValidationException($"Matrícula '{request.EmployeeCode}' já está em uso.");
         }

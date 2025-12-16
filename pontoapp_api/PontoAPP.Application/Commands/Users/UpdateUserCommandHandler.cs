@@ -35,7 +35,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserR
         if (!string.IsNullOrEmpty(request.Email) && 
             request.Email.ToLowerInvariant() != user.Email.Value.ToLowerInvariant())
         {
-            if (await _userRepository.EmailExistsAsync(request.Email, cancellationToken))
+            if (await _userRepository.EmailExistsInTenantAsync(request.Email))
             {
                 throw new ValidationException($"Email '{request.Email}' já está em uso.");
             }
@@ -45,7 +45,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserR
         if (!string.IsNullOrEmpty(request.EmployeeCode) && 
             request.EmployeeCode != user.EmployeeCode)
         {
-            if (await _userRepository.EmployeeCodeExistsAsync(request.EmployeeCode, cancellationToken))
+            if (await _userRepository.EmployeeCodeExistsAsync(request.EmployeeCode))
             {
                 throw new ValidationException($"Matrícula '{request.EmployeeCode}' já está em uso.");
             }

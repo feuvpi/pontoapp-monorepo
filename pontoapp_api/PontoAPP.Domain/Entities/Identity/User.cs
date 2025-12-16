@@ -1,3 +1,4 @@
+// PontoAPP.Domain/Entities/Identity/User.cs
 using PontoAPP.Domain.Entities.Common;
 using PontoAPP.Domain.Entities.TimeTracking;
 using PontoAPP.Domain.Enums;
@@ -5,25 +6,27 @@ using PontoAPP.Domain.ValueObjects;
 
 namespace PontoAPP.Domain.Entities.Identity;
 
-/// <summary>
-/// Representa um usuário dentro de um tenant
-/// Armazenada no TenantDbContext (schema específico do tenant)
-/// </summary>
 public class User : BaseEntity, ITenantEntity, IAuditableEntity
 {
     public Guid TenantId { get; set; }
-    public string FullName { get; private set; }
-    public Email Email { get; private set; }
-    public string PasswordHash { get; private set; }
-    public string? Pin { get; private set; } // PIN numérico para terminais
+    public string FullName { get; private set; } = string.Empty;
+    public Email Email { get; private set; } = null!;
+    public string PasswordHash { get; private set; } = string.Empty;
+    public string? Pin { get; private set; }
     public UserRole Role { get; private set; }
     public bool IsActive { get; private set; }
-    public string? BiometricHash { get; private set; } // Hash da biometria do aparelho (opcional)
+    public string? BiometricHash { get; private set; }
     
     // Informações adicionais
-    public string? EmployeeCode { get; private set; } // Matrícula
+    public string? EmployeeCode { get; private set; }
     public string? Department { get; private set; }
     public DateTime? HiredAt { get; private set; }
+    
+    // Auth - NOVOS CAMPOS
+    public bool MustChangePassword { get; private set; }
+    public string? RefreshToken { get; private set; }
+    public DateTime? RefreshTokenExpiresAt { get; private set; }
+    public DateTime? LastLoginAt { get; private set; }
     
     // Auditoria
     public string? CreatedBy { get; set; }
@@ -41,6 +44,7 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
         Email email, 
         string passwordHash, 
         UserRole role,
+        bool mustChangePassword,
         string? employeeCode = null,
         string? department = null)
     {
@@ -50,6 +54,7 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
         PasswordHash = passwordHash;
         Role = role;
         IsActive = true;
+        MustChangePassword = mustChangePassword;
         EmployeeCode = employeeCode;
         Department = department;
     }
@@ -60,6 +65,7 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
         string email,
         string passwordHash,
         UserRole role = UserRole.Employee,
+        bool mustChangePassword = false,
         string? employeeCode = null,
         string? department = null)
     {
@@ -71,7 +77,49 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
 
         var emailVO = Email.Create(email);
 
-        return new User(tenantId, fullName, emailVO, passwordHash, role, employeeCode, department);
+        return new User(tenantId, fullName, emailVO, passwordHash, role, mustChangePassword, employeeCode, department);
+    }
+
+    /// <summary>
+    /// Cria usuário admin para um novo tenant
+    /// </summary>
+    public static User CreateAdmin(
+        Guid tenantId,
+        string fullName,
+        string email,
+        string passwordHash)
+    {
+        return Create(
+            tenantId: tenantId,
+            fullName: fullName,
+            email: email,
+            passwordHash: passwordHash,
+            role: UserRole.Admin,
+            mustChangePassword: false
+        );
+    }
+
+    /// <summary>
+    /// Cria funcionário (chamado pelo admin)
+    /// </summary>
+    public static User CreateEmployee(
+        Guid tenantId,
+        string fullName,
+        string email,
+        string passwordHash,
+        string? employeeCode = null,
+        string? department = null)
+    {
+        return Create(
+            tenantId: tenantId,
+            fullName: fullName,
+            email: email,
+            passwordHash: passwordHash,
+            role: UserRole.Employee,
+            mustChangePassword: true, // Funcionário deve trocar senha no primeiro login
+            employeeCode: employeeCode,
+            department: department
+        );
     }
 
     public void UpdatePassword(string newPasswordHash)
@@ -80,6 +128,24 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
             throw new ArgumentException("Password hash is required", nameof(newPasswordHash));
 
         PasswordHash = newPasswordHash;
+        MustChangePassword = false; // Após trocar senha, não precisa mais
+    }
+
+    public void SetRefreshToken(string token, DateTime expiresAt)
+    {
+        RefreshToken = token;
+        RefreshTokenExpiresAt = expiresAt;
+    }
+
+    public void ClearRefreshToken()
+    {
+        RefreshToken = null;
+        RefreshTokenExpiresAt = null;
+    }
+
+    public void RecordLogin()
+    {
+        LastLoginAt = DateTime.UtcNow;
     }
 
     public void SetPin(string pin)
