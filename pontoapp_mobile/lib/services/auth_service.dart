@@ -2,13 +2,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pontoapp_mobile/core/network/api_client.dart';
 import 'package:pontoapp_mobile/core/constants/storage_keys.dart';
 import 'package:pontoapp_mobile/core/errors/failures.dart';
-import 'package:pontoapp_mobile/core/network/api_client.dart';
-import 'package:pontoapp_mobile/models/device.dart';
-import 'package:pontoapp_mobile/models/user.dart';
 import 'package:pontoapp_mobile/services/device_info_service.dart';
-
+import 'package:pontoapp_mobile/models/user.dart';
+import 'package:pontoapp_mobile/models/device.dart';
 
 class AuthService {
   final ApiClient _api;
@@ -24,20 +23,21 @@ class AuthService {
         password: password,
       ));
 
+      // Salvar tokens
       await _storage.write(key: StorageKeys.accessToken, value: response.token);
+      await _storage.write(key: StorageKeys.refreshToken, value: response.refreshToken);
       await _storage.write(key: StorageKeys.userId, value: response.user.id);
       await _storage.write(key: StorageKeys.tenantId, value: response.tenantId);
-      await _storage.write(
-          key: StorageKeys.userName, value: response.user.fullName);
+      await _storage.write(key: StorageKeys.userName, value: response.user.fullName);
 
+      // Registrar device (silent)
       await _registerDevice();
 
       return Right(response.user);
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? 'Erro no login';
-      return Left(AuthFailure(message));
+      return Left(_handleDioError(e));
     } catch (e) {
-      return Left(AuthFailure('Erro inesperado: $e'));
+      return Left(ServerFailure('Erro inesperado: $e'));
     }
   }
 
@@ -52,7 +52,7 @@ class AuthService {
       );
       await _api.registerDevice(request);
     } catch (_) {
-      // Silent fail - don't block login
+      // Silent fail
     }
   }
 
@@ -67,5 +67,26 @@ class AuthService {
 
   Future<void> logout() async {
     await _storage.deleteAll();
+  }
+
+  Failure _handleDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout) {
+      return const NetworkFailure();
+    }
+
+    final statusCode = e.response?.statusCode;
+    final data = e.response?.data;
+
+    String message = 'Erro no servidor';
+    if (data is Map<String, dynamic>) {
+      message = data['message'] ?? data['title'] ?? message;
+    }
+
+    if (statusCode == 401) {
+      return AuthFailure(message);
+    }
+
+    return ServerFailure(message, statusCode: statusCode);
   }
 }

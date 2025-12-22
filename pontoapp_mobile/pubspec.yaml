@@ -18,8 +18,10 @@ dependencies:
 
   # Network
   dio: ^5.7.0
-  retrofit: ^4.4.1
+  retrofit: ^4.9.1
   pretty_dio_logger: ^1.4.0
+
+  json_annotation: ^4.9.0
 
   # Local Storage
   flutter_secure_storage: ^9.2.2
@@ -58,7 +60,7 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.4.13
-  retrofit_generator: ^9.1.5
+  retrofit_generator: ^10.0.1
   json_serializable: ^6.8.0
 
 flutter:

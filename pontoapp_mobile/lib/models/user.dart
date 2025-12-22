@@ -10,6 +10,7 @@ class User {
   final String email;
   final String role;
   final bool isActive;
+  final bool mustChangePassword;
   final String? employeeCode;
   final String? department;
 
@@ -19,6 +20,7 @@ class User {
     required this.email,
     required this.role,
     required this.isActive,
+    required this.mustChangePassword,
     this.employeeCode,
     this.department,
   });
@@ -42,11 +44,15 @@ class LoginRequest {
 @JsonSerializable()
 class LoginResponse {
   final String token;
+  final String refreshToken;
+  final DateTime expiresAt;
   final User user;
   final String tenantId;
 
   LoginResponse({
     required this.token,
+    required this.refreshToken,
+    required this.expiresAt,
     required this.user,
     required this.tenantId,
   });

@@ -12,6 +12,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
   email: json['email'] as String,
   role: json['role'] as String,
   isActive: json['isActive'] as bool,
+  mustChangePassword: json['mustChangePassword'] as bool,
   employeeCode: json['employeeCode'] as String?,
   department: json['department'] as String?,
 );
@@ -22,6 +23,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'email': instance.email,
   'role': instance.role,
   'isActive': instance.isActive,
+  'mustChangePassword': instance.mustChangePassword,
   'employeeCode': instance.employeeCode,
   'department': instance.department,
 };
@@ -37,6 +39,8 @@ Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
 LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
     LoginResponse(
       token: json['token'] as String,
+      refreshToken: json['refreshToken'] as String,
+      expiresAt: DateTime.parse(json['expiresAt'] as String),
       user: User.fromJson(json['user'] as Map<String, dynamic>),
       tenantId: json['tenantId'] as String,
     );
@@ -44,6 +48,8 @@ LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
     <String, dynamic>{
       'token': instance.token,
+      'refreshToken': instance.refreshToken,
+      'expiresAt': instance.expiresAt.toIso8601String(),
       'user': instance.user,
       'tenantId': instance.tenantId,
     };
