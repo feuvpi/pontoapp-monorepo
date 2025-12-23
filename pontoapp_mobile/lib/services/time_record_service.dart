@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:pontoapp_mobile/core/errors/failures.dart';
 import 'package:pontoapp_mobile/core/network/api_client.dart';
-import 'package:pontoapp_mobile/models/time_record.dart';
 import 'package:pontoapp_mobile/services/biometric_service.dart';
 import 'package:pontoapp_mobile/services/device_info_service.dart';
 import 'package:pontoapp_mobile/services/location_service.dart';
+import 'package:pontoapp_mobile/core/errors/failures.dart';
+import 'package:pontoapp_mobile/models/time_record.dart';
 
 class TimeRecordService {
   final ApiClient _api;
@@ -23,6 +23,8 @@ class TimeRecordService {
   Future<Either<Failure, TimeRecord>> clockIn({bool useBiometric = true}) async {
     try {
       String authType = 'Password';
+      
+      // Só tenta biometria se disponível E solicitado
       if (useBiometric && await _biometric.isAvailable()) {
         final authResult = await _biometric.authenticate();
         final success = authResult.getOrElse(() => false);
@@ -31,6 +33,7 @@ class TimeRecordService {
         }
         authType = 'Biometric';
       }
+      // Se biometria não disponível, continua sem ela
 
       final deviceId = await _deviceInfo.getOrCreateDeviceId();
 
@@ -59,6 +62,7 @@ class TimeRecordService {
   Future<Either<Failure, TimeRecord>> clockOut({bool useBiometric = true}) async {
     try {
       String authType = 'Password';
+      
       if (useBiometric && await _biometric.isAvailable()) {
         final authResult = await _biometric.authenticate();
         final success = authResult.getOrElse(() => false);

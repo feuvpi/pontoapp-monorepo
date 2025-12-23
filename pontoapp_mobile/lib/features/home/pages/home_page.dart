@@ -1,10 +1,15 @@
 // lib/features/home/pages/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:pontoapp_mobile/core/di/injection.dart';
 import 'package:pontoapp_mobile/core/theme/app_colors.dart';
 import 'package:pontoapp_mobile/core/theme/app_text_styles.dart';
 import 'package:pontoapp_mobile/shared/widgets/clock_widget.dart';
 import 'package:pontoapp_mobile/shared/widgets/summary_card.dart';
+import 'package:pontoapp_mobile/features/home/bloc/home_bloc.dart';
+import 'package:pontoapp_mobile/features/home/bloc/home_event.dart';
+import 'package:pontoapp_mobile/features/home/bloc/home_state.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,9 +19,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  ClockStatus _clockStatus = ClockStatus.idle;
-  final List<TimeEntry> _entries = [];
-  String _totalWorked = '0h 00min';
+  late final HomeBloc _homeBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeBloc = getIt<HomeBloc>();
+    _homeBloc.add(HomeLoadRequested());
+  }
 
   String get _greeting {
     final hour = DateTime.now().hour;
@@ -29,122 +39,73 @@ class _HomePageState extends State<HomePage> {
     final now = DateTime.now();
     final formatter = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
     final formatted = formatter.format(now);
-    // Capitalize first letter
     return formatted[0].toUpperCase() + formatted.substring(1);
   }
 
-  void _handleClockTap() {
-    if (_clockStatus == ClockStatus.loading) return;
+  void _handleClockTap(HomeState state) {
+    if (state.isClocking) return;
 
-    setState(() => _clockStatus = ClockStatus.loading);
-
-    // Simulate API call
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        final now = DateTime.now();
-        final timeStr = DateFormat('HH:mm').format(now);
-
-        if (_clockStatus == ClockStatus.loading) {
-          // Check if we need to clock in or out
-          final needsClockIn = _entries.isEmpty ||
-              _entries.last.isClockOut;
-
-          if (needsClockIn) {
-            _entries.add(TimeEntry(
-              time: timeStr,
-              type: 'in',
-              dateTime: now,
-            ));
-            _clockStatus = ClockStatus.clockedIn;
-          } else {
-            _entries.add(TimeEntry(
-              time: timeStr,
-              type: 'out',
-              dateTime: now,
-            ));
-            _clockStatus = ClockStatus.clockedOut;
-          }
-
-          _calculateTotalWorked();
-        }
-      });
-    });
-  }
-
-  void _calculateTotalWorked() {
-    int totalMinutes = 0;
-
-    for (int i = 0; i < _entries.length; i += 2) {
-      final clockIn = _entries[i];
-      final clockOut = i + 1 < _entries.length ? _entries[i + 1] : null;
-
-      if (clockOut != null) {
-        final diff = clockOut.dateTime.difference(clockIn.dateTime);
-        totalMinutes += diff.inMinutes;
-      } else {
-        // Still working - calculate from clock in to now
-        final diff = DateTime.now().difference(clockIn.dateTime);
-        totalMinutes += diff.inMinutes;
-      }
+    if (state.nextAction == ClockAction.clockIn) {
+      _homeBloc.add(HomeClockInRequested());
+    } else {
+      _homeBloc.add(HomeClockOutRequested());
     }
-
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
-    setState(() {
-      _totalWorked = '${hours}h ${minutes.toString().padLeft(2, '0')}min';
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
+    return BlocProvider.value(
+      value: _homeBloc,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: BlocConsumer<HomeBloc, HomeState>(
+            listener: (context, state) {
+              if (state.error != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.error!),
+                    backgroundColor: AppColors.error,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state.isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
 
-              // Header
-              _buildHeader(),
-
-              const SizedBox(height: 32),
-
-              // Greeting
-              _buildGreeting(),
-
-              const SizedBox(height: 40),
-
-              // Clock
-              ClockWidget(
-                status: _clockStatus,
-                onTap: _handleClockTap,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Status text
-              Text(
-                _getStatusText(),
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Summary
-              SummaryCard(
-                entries: _entries,
-                totalWorked: _totalWorked,
-                onTapViewAll: () {
-                  // TODO: Navigate to history
+              return RefreshIndicator(
+                onRefresh: () async {
+                  _homeBloc.add(HomeRefreshRequested());
                 },
-              ),
-
-              const SizedBox(height: 100), // Space for bottom nav
-            ],
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      _buildHeader(),
+                      const SizedBox(height: 32),
+                      _buildGreeting(state),
+                      const SizedBox(height: 40),
+                      _buildClock(state),
+                      const SizedBox(height: 16),
+                      _buildStatusText(state),
+                      const SizedBox(height: 40),
+                      _buildSummary(state),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -166,15 +127,12 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              _formattedDate,
-              style: AppTextStyles.bodySmall,
-            ),
+            Text(_formattedDate, style: AppTextStyles.bodySmall),
           ],
         ),
         IconButton(
           onPressed: () {
-            // TODO: Navigate to settings
+            // TODO: Navigate to settings/profile
           },
           icon: const Icon(
             Icons.settings_outlined,
@@ -185,27 +143,73 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildGreeting() {
+  Widget _buildGreeting(HomeState state) {
     return Column(
       children: [
         Text(
-          '$_greeting, João! 👋',
+          '$_greeting, ${state.userName.split(' ').first}! 👋',
           style: AppTextStyles.h2,
         ),
       ],
     );
   }
 
-  String _getStatusText() {
-    switch (_clockStatus) {
-      case ClockStatus.idle:
-        return 'Toque para registrar entrada';
-      case ClockStatus.clockedIn:
-        return 'Toque para registrar saída';
-      case ClockStatus.clockedOut:
-        return 'Expediente encerrado';
-      case ClockStatus.loading:
-        return 'Registrando...';
+  Widget _buildClock(HomeState state) {
+    ClockStatus clockStatus;
+
+    if (state.isClocking) {
+      clockStatus = ClockStatus.loading;
+    } else if (state.nextAction == ClockAction.clockOut) {
+      clockStatus = ClockStatus.clockedIn;
+    } else if (state.summary != null && state.summary!.records.isNotEmpty) {
+      // Tem registros mas próxima ação é clockIn = já fez clockOut
+      final hasCompleteDay = state.summary!.records.length >= 2 &&
+          state.summary!.records.length % 2 == 0;
+      clockStatus = hasCompleteDay ? ClockStatus.clockedOut : ClockStatus.idle;
+    } else {
+      clockStatus = ClockStatus.idle;
     }
+
+    return ClockWidget(
+      status: clockStatus,
+      onTap: () => _handleClockTap(state),
+    );
+  }
+
+  Widget _buildStatusText(HomeState state) {
+    String text;
+
+    if (state.isClocking) {
+      text = 'Registrando...';
+    } else if (state.nextAction == ClockAction.clockIn) {
+      text = 'Toque para registrar entrada';
+    } else {
+      text = 'Toque para registrar saída';
+    }
+
+    return Text(
+      text,
+      style: AppTextStyles.bodyMedium.copyWith(
+        color: AppColors.textSecondary,
+      ),
+    );
+  }
+
+  Widget _buildSummary(HomeState state) {
+    final entries = state.summary?.records.map((r) {
+      return TimeEntry(
+        time: DateFormat('HH:mm').format(r.recordedAt),
+        type: r.isClockIn ? 'in' : 'out',
+        dateTime: r.recordedAt,
+      );
+    }).toList() ?? [];
+
+    return SummaryCard(
+      entries: entries,
+      totalWorked: state.summary?.totalWorkedFormatted ?? '0h 00min',
+      onTapViewAll: () {
+        // TODO: Navigate to history
+      },
+    );
   }
 }

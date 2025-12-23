@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pontoapp_mobile/core/network/dio_client.dart';
 import 'package:pontoapp_mobile/core/network/api_client.dart';
+import 'package:pontoapp_mobile/features/home/bloc/home_bloc.dart';
 import 'package:pontoapp_mobile/services/biometric_service.dart';
 import 'package:pontoapp_mobile/services/device_info_service.dart';
 import 'package:pontoapp_mobile/services/location_service.dart';
@@ -51,4 +52,5 @@ Future<void> configureDependencies() async {
 
   // 6. BLoCs (factory - nova instância cada vez)
   getIt.registerFactory<AuthBloc>(() => AuthBloc(authService));
+  getIt.registerFactory<HomeBloc>(() => HomeBloc(authService, timeRecordService));
 }
