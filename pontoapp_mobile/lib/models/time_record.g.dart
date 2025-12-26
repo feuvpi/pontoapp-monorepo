@@ -59,18 +59,18 @@ Map<String, dynamic> _$DailySummaryToJson(DailySummary instance) =>
     };
 
 ClockRequest _$ClockRequestFromJson(Map<String, dynamic> json) => ClockRequest(
-  deviceId: json['deviceId'] as String,
-  authenticationType: json['authenticationType'] as String,
-  latitude: (json['latitude'] as num?)?.toDouble(),
-  longitude: (json['longitude'] as num?)?.toDouble(),
-  notes: json['notes'] as String?,
+  deviceId: json['DeviceId'] as String,
+  authenticationType: json['AuthenticationType'] as String,
+  latitude: (json['Latitude'] as num?)?.toDouble(),
+  longitude: (json['Longitude'] as num?)?.toDouble(),
+  notes: json['Notes'] as String?,
 );
 
 Map<String, dynamic> _$ClockRequestToJson(ClockRequest instance) =>
     <String, dynamic>{
-      'deviceId': instance.deviceId,
-      'authenticationType': instance.authenticationType,
-      'latitude': instance.latitude,
-      'longitude': instance.longitude,
-      'notes': instance.notes,
+      'DeviceId': instance.deviceId,
+      'AuthenticationType': instance.authenticationType,
+      'Latitude': instance.latitude,
+      'Longitude': instance.longitude,
+      'Notes': instance.notes,
     };

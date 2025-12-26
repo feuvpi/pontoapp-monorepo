@@ -68,10 +68,19 @@ class DailySummary {
 
 @JsonSerializable()
 class ClockRequest {
+  @JsonKey(name: 'DeviceId')
   final String deviceId;
+  
+  @JsonKey(name: 'AuthenticationType')
   final String authenticationType;
+  
+  @JsonKey(name: 'Latitude')
   final double? latitude;
+  
+  @JsonKey(name: 'Longitude')
   final double? longitude;
+  
+  @JsonKey(name: 'Notes')
   final String? notes;
 
   ClockRequest({

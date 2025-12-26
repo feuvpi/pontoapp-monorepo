@@ -48,13 +48,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<TimeRecord> clockIn(ClockRequest request) async {
+  Future<ApiResponse<TimeRecord>> clockIn(ClockRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson());
-    final _options = _setStreamType<TimeRecord>(
+    final _options = _setStreamType<ApiResponse<TimeRecord>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -65,9 +65,12 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late TimeRecord _value;
+    late ApiResponse<TimeRecord> _value;
     try {
-      _value = TimeRecord.fromJson(_result.data!);
+      _value = ApiResponse<TimeRecord>.fromJson(
+        _result.data!,
+        (json) => TimeRecord.fromJson(json as Map<String, dynamic>),
+      );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -76,13 +79,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<TimeRecord> clockOut(ClockRequest request) async {
+  Future<ApiResponse<TimeRecord>> clockOut(ClockRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson());
-    final _options = _setStreamType<TimeRecord>(
+    final _options = _setStreamType<ApiResponse<TimeRecord>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -93,9 +96,12 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late TimeRecord _value;
+    late ApiResponse<TimeRecord> _value;
     try {
-      _value = TimeRecord.fromJson(_result.data!);
+      _value = ApiResponse<TimeRecord>.fromJson(
+        _result.data!,
+        (json) => TimeRecord.fromJson(json as Map<String, dynamic>),
+      );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -104,13 +110,13 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<DailySummary> getDailySummary(String? date) async {
+  Future<ApiResponse<DailySummary>> getDailySummary(String? date) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'date': date};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<DailySummary>(
+    final _options = _setStreamType<ApiResponse<DailySummary>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -121,9 +127,12 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late DailySummary _value;
+    late ApiResponse<DailySummary> _value;
     try {
-      _value = DailySummary.fromJson(_result.data!);
+      _value = ApiResponse<DailySummary>.fromJson(
+        _result.data!,
+        (json) => DailySummary.fromJson(json as Map<String, dynamic>),
+      );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -132,7 +141,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<TimeRecord>> getMyRecords(
+  Future<ApiResponse<List<TimeRecord>>> getMyRecords(
     String? startDate,
     String? endDate,
   ) async {
@@ -144,7 +153,7 @@ class _ApiClient implements ApiClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<TimeRecord>>(
+    final _options = _setStreamType<ApiResponse<List<TimeRecord>>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -154,12 +163,19 @@ class _ApiClient implements ApiClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<TimeRecord> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ApiResponse<List<TimeRecord>> _value;
     try {
-      _value = _result.data!
-          .map((dynamic i) => TimeRecord.fromJson(i as Map<String, dynamic>))
-          .toList();
+      _value = ApiResponse<List<TimeRecord>>.fromJson(
+        _result.data!,
+        (json) => json is List<dynamic>
+            ? json
+                  .map<TimeRecord>(
+                    (i) => TimeRecord.fromJson(i as Map<String, dynamic>),
+                  )
+                  .toList()
+            : List.empty(),
+      );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -168,13 +184,15 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<Device> registerDevice(RegisterDeviceRequest request) async {
+  Future<ApiResponse<Device>> registerDevice(
+    RegisterDeviceRequest request,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson());
-    final _options = _setStreamType<Device>(
+    final _options = _setStreamType<ApiResponse<Device>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -185,9 +203,12 @@ class _ApiClient implements ApiClient {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late Device _value;
+    late ApiResponse<Device> _value;
     try {
-      _value = Device.fromJson(_result.data!);
+      _value = ApiResponse<Device>.fromJson(
+        _result.data!,
+        (json) => Device.fromJson(json as Map<String, dynamic>),
+      );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;
@@ -196,12 +217,12 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<List<Device>> getMyDevices() async {
+  Future<ApiResponse<List<Device>>> getMyDevices() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<Device>>(
+    final _options = _setStreamType<ApiResponse<List<Device>>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -211,12 +232,19 @@ class _ApiClient implements ApiClient {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<Device> _value;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ApiResponse<List<Device>> _value;
     try {
-      _value = _result.data!
-          .map((dynamic i) => Device.fromJson(i as Map<String, dynamic>))
-          .toList();
+      _value = ApiResponse<List<Device>>.fromJson(
+        _result.data!,
+        (json) => json is List<dynamic>
+            ? json
+                  .map<Device>(
+                    (i) => Device.fromJson(i as Map<String, dynamic>),
+                  )
+                  .toList()
+            : List.empty(),
+      );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, _result);
       rethrow;

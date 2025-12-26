@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pontoapp_mobile/core/di/injection.dart';
 import 'package:pontoapp_mobile/core/theme/app_colors.dart';
 import 'package:pontoapp_mobile/core/theme/app_text_styles.dart';
+import 'package:pontoapp_mobile/features/profile/pages/profile_page.dart';
 import 'package:pontoapp_mobile/shared/widgets/clock_widget.dart';
 import 'package:pontoapp_mobile/shared/widgets/summary_card.dart';
 import 'package:pontoapp_mobile/features/home/bloc/home_bloc.dart';
@@ -131,9 +132,12 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         IconButton(
-          onPressed: () {
-            // TODO: Navigate to settings/profile
-          },
+     onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProfilePage()),
+    );
+  },
           icon: const Icon(
             Icons.settings_outlined,
             color: AppColors.textSecondary,
@@ -198,7 +202,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildSummary(HomeState state) {
     final entries = state.summary?.records.map((r) {
       return TimeEntry(
-        time: DateFormat('HH:mm').format(r.recordedAt),
+        time: DateFormat('HH:mm').format(r.recordedAt.toLocal()),  
         type: r.isClockIn ? 'in' : 'out',
         dateTime: r.recordedAt,
       );

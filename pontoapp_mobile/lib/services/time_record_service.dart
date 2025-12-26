@@ -1,3 +1,4 @@
+// lib/services/time_record_service.dart
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:pontoapp_mobile/core/network/api_client.dart';
@@ -24,7 +25,6 @@ class TimeRecordService {
     try {
       String authType = 'Password';
       
-      // Só tenta biometria se disponível E solicitado
       if (useBiometric && await _biometric.isAvailable()) {
         final authResult = await _biometric.authenticate();
         final success = authResult.getOrElse(() => false);
@@ -33,7 +33,6 @@ class TimeRecordService {
         }
         authType = 'Biometric';
       }
-      // Se biometria não disponível, continua sem ela
 
       final deviceId = await _deviceInfo.getOrCreateDeviceId();
 
@@ -44,14 +43,18 @@ class TimeRecordService {
         lng = pos.longitude;
       });
 
-      final record = await _api.clockIn(ClockRequest(
+      final response = await _api.clockIn(ClockRequest(
         deviceId: deviceId,
         authenticationType: authType,
         latitude: lat,
         longitude: lng,
       ));
 
-      return Right(record);
+      if (response.success && response.data != null) {
+        return Right(response.data!);
+      } else {
+        return Left(ServerFailure(response.message ?? 'Erro ao registrar entrada'));
+      }
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {
@@ -81,14 +84,18 @@ class TimeRecordService {
         lng = pos.longitude;
       });
 
-      final record = await _api.clockOut(ClockRequest(
+      final response = await _api.clockOut(ClockRequest(
         deviceId: deviceId,
         authenticationType: authType,
         latitude: lat,
         longitude: lng,
       ));
 
-      return Right(record);
+      if (response.success && response.data != null) {
+        return Right(response.data!);
+      } else {
+        return Left(ServerFailure(response.message ?? 'Erro ao registrar saída'));
+      }
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {
@@ -99,10 +106,17 @@ class TimeRecordService {
   Future<Either<Failure, DailySummary>> getDailySummary({DateTime? date}) async {
     try {
       final dateStr = date?.toIso8601String().split('T').first;
-      final summary = await _api.getDailySummary(dateStr);
-      return Right(summary);
+      final response = await _api.getDailySummary(dateStr);
+      
+      if (response.success && response.data != null) {
+        return Right(response.data!);
+      } else {
+        return Left(ServerFailure(response.message ?? 'Erro ao buscar resumo'));
+      }
     } on DioException catch (e) {
       return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('Erro inesperado: $e'));
     }
   }
 
@@ -111,13 +125,20 @@ class TimeRecordService {
     DateTime? endDate,
   }) async {
     try {
-      final records = await _api.getMyRecords(
+      final response = await _api.getMyRecords(
         startDate?.toIso8601String(),
         endDate?.toIso8601String(),
       );
-      return Right(records);
+      
+      if (response.success && response.data != null) {
+        return Right(response.data!);
+      } else {
+        return Left(ServerFailure(response.message ?? 'Erro ao buscar registros'));
+      }
     } on DioException catch (e) {
       return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('Erro inesperado: $e'));
     }
   }
 
@@ -127,7 +148,13 @@ class TimeRecordService {
       return const NetworkFailure();
     }
 
-    final message = e.response?.data?['message'] ?? 'Erro no servidor';
+    final data = e.response?.data;
+    String message = 'Erro no servidor';
+    
+    if (data is Map<String, dynamic>) {
+      message = data['message'] ?? message;
+    }
+    
     final statusCode = e.response?.statusCode;
 
     if (statusCode == 401) {

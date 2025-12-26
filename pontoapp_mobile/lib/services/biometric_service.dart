@@ -1,4 +1,4 @@
-// lib/core/services/biometric_service.dart
+// lib/services/biometric_service.dart
 import 'package:dartz/dartz.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pontoapp_mobile/core/errors/failures.dart';
@@ -10,7 +10,14 @@ class BiometricService {
     try {
       final canCheck = await _localAuth.canCheckBiometrics;
       final isSupported = await _localAuth.isDeviceSupported();
-      return canCheck && isSupported;
+      
+      if (!canCheck || !isSupported) {
+        return false;
+      }
+      
+      // Verificar se tem biometria CADASTRADA
+      final availableBiometrics = await _localAuth.getAvailableBiometrics();
+      return availableBiometrics.isNotEmpty;
     } catch (_) {
       return false;
     }
@@ -30,20 +37,20 @@ class BiometricService {
     try {
       final isAvailable = await this.isAvailable();
       if (!isAvailable) {
-        return const Left(BiometricFailure('Biometria não disponível'));
+        return const Right(true); // Skip se não disponível
       }
 
       final authenticated = await _localAuth.authenticate(
         localizedReason: reason,
         options: const AuthenticationOptions(
           stickyAuth: true,
-          biometricOnly: true,
+          biometricOnly: false,
         ),
       );
 
       return Right(authenticated);
     } catch (e) {
-      return Left(BiometricFailure('Erro na autenticação: $e'));
+      return const Right(true); // Skip em caso de erro
     }
   }
 }

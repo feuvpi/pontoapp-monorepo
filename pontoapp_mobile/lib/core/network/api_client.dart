@@ -3,6 +3,7 @@ import 'package:retrofit/retrofit.dart';
 import 'package:pontoapp_mobile/models/user.dart';
 import 'package:pontoapp_mobile/models/time_record.dart';
 import 'package:pontoapp_mobile/models/device.dart';
+import 'package:pontoapp_mobile/models/api_response.dart';
 
 part 'api_client.g.dart';
 
@@ -16,26 +17,26 @@ abstract class ApiClient {
 
   // Time Records
   @POST('/timerecords/clock-in')
-  Future<TimeRecord> clockIn(@Body() ClockRequest request);
+  Future<ApiResponse<TimeRecord>> clockIn(@Body() ClockRequest request);
 
   @POST('/timerecords/clock-out')
-  Future<TimeRecord> clockOut(@Body() ClockRequest request);
+  Future<ApiResponse<TimeRecord>> clockOut(@Body() ClockRequest request);
 
   @GET('/timerecords/daily-summary')
-  Future<DailySummary> getDailySummary(@Query('date') String? date);
+  Future<ApiResponse<DailySummary>> getDailySummary(@Query('date') String? date);
 
   @GET('/timerecords/my-records')
-  Future<List<TimeRecord>> getMyRecords(
+  Future<ApiResponse<List<TimeRecord>>> getMyRecords(
     @Query('startDate') String? startDate,
     @Query('endDate') String? endDate,
   );
 
   // Devices
   @POST('/devices/register')
-  Future<Device> registerDevice(@Body() RegisterDeviceRequest request);
+  Future<ApiResponse<Device>> registerDevice(@Body() RegisterDeviceRequest request);
 
   @GET('/devices/my-devices')
-  Future<List<Device>> getMyDevices();
+  Future<ApiResponse<List<Device>>> getMyDevices();
 
   @DELETE('/devices/{id}')
   Future<void> deactivateDevice(@Path('id') String id);
