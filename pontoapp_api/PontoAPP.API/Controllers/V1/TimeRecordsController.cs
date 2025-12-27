@@ -42,6 +42,7 @@ public class TimeRecordsController(
         {
             TenantId = tenantInfo.TenantId,
             UserId = userId.Value,
+            DeviceId = request.DeviceId,
             AuthenticationType = request.AuthenticationType,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
@@ -128,7 +129,8 @@ public class TimeRecordsController(
         try
         {
             var result = await Mediator.Send(query, cancellationToken);
-            return Ok(result);
+            return Success(result);
+            //return Ok(result);
         }
         catch (NotFoundException ex)
         {

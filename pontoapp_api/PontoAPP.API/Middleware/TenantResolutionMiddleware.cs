@@ -99,7 +99,9 @@ public class TenantResolutionMiddleware(
             "/health",
             "/swagger",
             "/api/v1/tenants", 
-            "/api/v1/auth/login"
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
+            "/api/v1/auth/refresh"
         };
 
         return publicPaths.Any(p => path.StartsWith(p));
