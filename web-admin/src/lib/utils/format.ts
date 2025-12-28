@@ -24,7 +24,7 @@ export function formatDateTime(date: Date | string): string {
 	return formatDate(date, DATE_FORMATS.DATETIME);
 }
 
-/**
+/**git 
  * Format relative time (e.g., "há 2 horas")
  */
 export function formatRelativeTime(date: Date | string): string {
