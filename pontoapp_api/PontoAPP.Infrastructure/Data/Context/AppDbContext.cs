@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PontoAPP.Domain.Entities.Devices;
 using PontoAPP.Domain.Entities.Identity;
 using PontoAPP.Domain.Entities.Tenants;
 using PontoAPP.Domain.Entities.TimeTracking;
@@ -37,6 +38,7 @@ public class AppDbContext : DbContext
     // Tenant tables (com filtro de tenant)
     public DbSet<User> Users => Set<User>();
     public DbSet<TimeRecord> TimeRecords => Set<TimeRecord>();
+    public DbSet<Device> Devices => Set<Device>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
