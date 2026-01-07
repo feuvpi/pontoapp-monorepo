@@ -31,7 +31,7 @@ public class TenantResolver : ITenantResolver
         // Estratégia 1: JWT Claim (usuário autenticado)
         if (httpContext.User.Identity?.IsAuthenticated == true)
         {
-            var tenantClaim = httpContext.User.FindFirst("tenant_id")?.Value;
+            var tenantClaim = httpContext.User.FindFirst("tenantId")?.Value;
             if (!string.IsNullOrEmpty(tenantClaim))
             {
                 identifier = tenantClaim;

@@ -165,10 +165,12 @@ app.UseHttpsRedirection();
 app.UseResponseCompression();
 app.UseCors("DefaultCorsPolicy");
 
-app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+
+app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {
