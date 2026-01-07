@@ -13,6 +13,14 @@ export interface ChangePasswordRequest {
 	newPassword: string;
 }
 
+export interface RegisterRequest {
+	companyName: string;
+	companyDocument: string;
+	adminName: string;
+	adminEmail: string;
+	password: string;
+}
+
 /**
  * Authentication Service
  */
@@ -36,6 +44,34 @@ export const authService = {
 			email: response.user.email,
 			fullName: response.user.fullName,
 			role: response.user.role as UserRole,
+			mustChangePassword: response.user.mustChangePassword,
+			status: 'Active',
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString()
+		});
+
+		return response;
+	},
+
+	/**
+ * Register new company + admin user
+	 */
+async register(data: RegisterRequest): Promise<LoginResponse> {
+		const response = await api.post<LoginResponse>(
+			'/Auth/register',
+			data,
+			{ skipAuth: true }
+		);
+
+		// Store tokens
+		api.setTokens(response.token, response.refreshToken);
+
+		// Store user in auth state
+		auth.setUser({
+			id: response.user.id,
+			email: response.user.email,
+			fullName: response.user.fullName,
+			role: response.user.role as any,
 			mustChangePassword: response.user.mustChangePassword,
 			status: 'Active',
 			createdAt: new Date().toISOString(),

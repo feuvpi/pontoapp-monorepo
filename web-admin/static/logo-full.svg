@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B4D6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2D3A5F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon (scaled down) -->
+  <g transform="translate(5, 5)">
+    <!-- Outer diamond -->
+    <path d="M35 5 L65 35 L35 65 L5 35 Z" 
+          fill="none" 
+          stroke="url(#logoGrad)" 
+          stroke-width="2.5" 
+          stroke-linejoin="miter"/>
+    
+    <!-- Second layer -->
+    <path d="M35 11 L59 35 L35 59 L11 35 Z" 
+          fill="none" 
+          stroke="url(#logoGrad)" 
+          stroke-width="2.5" 
+          stroke-linejoin="miter"/>
+    
+    <!-- Third layer -->
+    <path d="M35 17 L53 35 L35 53 L17 35 Z" 
+          fill="none" 
+          stroke="url(#logoGrad)" 
+          stroke-width="2.5" 
+          stroke-linejoin="miter"/>
+    
+    <!-- Fourth layer -->
+    <path d="M35 23 L47 35 L35 47 L23 35 Z" 
+          fill="none" 
+          stroke="url(#logoGrad)" 
+          stroke-width="2.5" 
+          stroke-linejoin="miter"/>
+    
+    <!-- Inner diamond -->
+    <path d="M35 29 L41 35 L35 41 L29 35 Z" 
+          fill="url(#logoGrad)"/>
+    
+    <!-- Breaks -->
+    <rect x="33.5" y="3" width="3" height="6" fill="white" opacity="0.9"/>
+    <rect x="61" y="33.5" width="6" height="3" fill="white" opacity="0.9"/>
+    <rect x="33.5" y="61" width="3" height="6" fill="white" opacity="0.9"/>
+    <rect x="3" y="33.5" width="6" height="3" fill="white" opacity="0.9"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="85" y="50" 
+        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif" 
+        font-size="32" 
+        font-weight="700" 
+        fill="#2D3A5F"
+        letter-spacing="-0.5">
+    PontoApp
+  </text>
+</svg>

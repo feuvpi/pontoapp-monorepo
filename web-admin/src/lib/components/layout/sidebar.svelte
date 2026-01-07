@@ -33,9 +33,11 @@
 	)}
 >
 	<!-- Logo -->
-	<div class="flex h-16 items-center border-b border-sidebar-border px-6">
+	<div class="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
+		<img src="/logo-icon.svg" alt="PontoApp" class="h-8 w-8" />
 		<h1 class="text-xl font-bold text-sidebar-foreground">PontoApp</h1>
 	</div>
+
 
 	<!-- Navigation -->
 	<nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">

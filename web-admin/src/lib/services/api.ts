@@ -173,16 +173,7 @@ class ApiClient {
 			throw apiError;
 		}
 
-		// Extract data from wrapper if present
-		if (
-			data &&
-			typeof data === 'object' &&
-			'success' in data &&
-			'data' in data
-		) {
-			return (data as { data: T }).data;
-		}
-
+		// API retorna diretamente o objeto (sem wrapper)
 		return data as T;
 	}
 

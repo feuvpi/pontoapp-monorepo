@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <!-- Gradient para dar profundidade -->
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B4D6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2D3A5F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer diamond -->
+  <path d="M100 15 L185 100 L100 185 L15 100 Z" 
+        fill="none" 
+        stroke="url(#logoGradient)" 
+        stroke-width="5" 
+        stroke-linejoin="miter"/>
+  
+  <!-- Second layer -->
+  <path d="M100 32 L168 100 L100 168 L32 100 Z" 
+        fill="none" 
+        stroke="url(#logoGradient)" 
+        stroke-width="5" 
+        stroke-linejoin="miter"/>
+  
+  <!-- Third layer -->
+  <path d="M100 49 L151 100 L100 151 L49 100 Z" 
+        fill="none" 
+        stroke="url(#logoGradient)" 
+        stroke-width="5" 
+        stroke-linejoin="miter"/>
+  
+  <!-- Fourth layer -->
+  <path d="M100 66 L134 100 L100 134 L66 100 Z" 
+        fill="none" 
+        stroke="url(#logoGradient)" 
+        stroke-width="5" 
+        stroke-linejoin="miter"/>
+  
+  <!-- Inner diamond (filled) -->
+  <path d="M100 83 L117 100 L100 117 L83 100 Z" 
+        fill="url(#logoGradient)"/>
+  
+  <!-- Decorative breaks creating the "interrupted" effect -->
+  <!-- Top -->
+  <rect x="97" y="10" width="6" height="15" fill="white" opacity="0.9"/>
+  
+  <!-- Right -->
+  <rect x="175" y="97" width="15" height="6" fill="white" opacity="0.9"/>
+  
+  <!-- Bottom -->
+  <rect x="97" y="175" width="6" height="15" fill="white" opacity="0.9"/>
+  
+  <!-- Left -->
+  <rect x="10" y="97" width="15" height="6" fill="white" opacity="0.9"/>
+  
+  <!-- Corner accents -->
+  <!-- Top-left -->
+  <path d="M42 42 L52 42 L52 52" 
+        stroke="url(#logoGradient)" 
+        stroke-width="4" 
+        stroke-linecap="round" 
+        fill="none"/>
+  
+  <!-- Top-right -->
+  <path d="M148 52 L148 42 L158 42" 
+        stroke="url(#logoGradient)" 
+        stroke-width="4" 
+        stroke-linecap="round" 
+        fill="none"/>
+  
+  <!-- Bottom-right -->
+  <path d="M158 158 L148 158 L148 148" 
+        stroke="url(#logoGradient)" 
+        stroke-width="4" 
+        stroke-linecap="round" 
+        fill="none"/>
+  
+  <!-- Bottom-left -->
+  <path d="M52 148 L52 158 L42 158" 
+        stroke="url(#logoGradient)" 
+        stroke-width="4" 
+        stroke-linecap="round" 
+        fill="none"/>
+</svg>

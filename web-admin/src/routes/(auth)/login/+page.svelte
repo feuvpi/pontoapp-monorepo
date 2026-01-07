@@ -130,6 +130,15 @@
 		</form>
 	</div>
 
+    	<!-- Register Link -->
+	<p class="text-center text-sm text-muted-foreground">
+		Primeira vez aqui?
+		<a href="/register" class="font-medium text-primary hover:underline">
+			Cadastrar empresa
+		</a>
+	</p>
+
+
 	<!-- Footer -->
 	<p class="text-center text-sm text-muted-foreground">
 		Desenvolvido por <span class="font-medium">PontoApp</span>
