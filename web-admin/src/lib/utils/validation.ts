@@ -38,6 +38,9 @@ export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 /**
  * Create user schema
  */
+/**
+39 * Create user schema
+ */
 export const createUserSchema = z.object({
 	fullName: z
 		.string()
@@ -49,10 +52,18 @@ export const createUserSchema = z.object({
 		.min(1, 'E-mail é obrigatório')
 		.email('E-mail inválido')
 		.toLowerCase(),
+	password: z
+		.string()
+		.min(6, 'Senha deve ter no mínimo 6 caracteres')
+		.regex(/[A-Z]/, 'Senha deve conter ao menos uma letra maiúscula')
+		.regex(/[a-z]/, 'Senha deve conter ao menos uma letra minúscula')
+		.regex(/[0-9]/, 'Senha deve conter ao menos um número'),
 	employeeCode: z.string().trim().optional(),
 	department: z.string().trim().optional(),
-	role: z.enum(['Admin', 'Manager', 'HR', 'Employee']).default('Employee')
+	role: z.enum(['Admin', 'Manager', 'HR', 'Employee']).default('Employee'),
+	hiredAt: z.string().optional()
 });
+
 
 export type CreateUserForm = z.infer<typeof createUserSchema>;
 

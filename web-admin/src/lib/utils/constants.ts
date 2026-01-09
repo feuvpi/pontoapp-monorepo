@@ -11,6 +11,13 @@ export const USER_ROLES = {
 	EMPLOYEE: 'Employee'
 } as const;
 
+export const USER_ROLE_LABELS: Record<string, string> = {
+	Admin: 'Administrador',
+	Manager: 'Gerente',
+	HR: 'RH',
+	Employee: 'Funcionário'
+};
+
 export const USER_STATUS = {
 	ACTIVE: 'Active',
 	INACTIVE: 'Inactive',
