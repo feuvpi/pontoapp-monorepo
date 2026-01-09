@@ -73,7 +73,19 @@ public class TimeRecord : BaseEntity, ITenantEntity, IAuditableEntity
     {
         Status = status;
     }
-
+    
+    public void UpdateRecordedAt(DateTime recordedAt)
+    {
+        RecordedAt = recordedAt;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public void UpdateType(RecordType type)
+    {
+        Type = type;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
     public void Reject(string? reason = null)
     {
         Status = RecordStatus.Rejected;
@@ -103,10 +115,17 @@ public class TimeRecord : BaseEntity, ITenantEntity, IAuditableEntity
     {
         Notes = notes;
     }
+    
+    public void UpdateNotes(string? notes)
+    {
+        Notes = notes;
+        UpdatedAt = DateTime.UtcNow;
+    }
 
-    public void UpdateLocation(double latitude, double longitude)
+    public void UpdateLocation(double? latitude, double? longitude)
     {
         Latitude = latitude;
         Longitude = longitude;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
