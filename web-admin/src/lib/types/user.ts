@@ -8,24 +8,27 @@ export type UserStatus = 'Active' | 'Inactive' | 'Pending';
 
 export interface User {
 	id: string;
-	email: string;
 	fullName: string;
-	employeeCode?: string;
-	department?: string;
+	email: string;
 	role: UserRole;
-	status: UserStatus;
-	mustChangePassword: boolean;
+	isActive: boolean;
+	employeeCode?: string | null;
+	department?: string | null;
+	hiredAt?: string | null;
 	createdAt: string;
-	updatedAt: string;
+	updatedAt?: string;
 	lastLoginAt?: string;
+	mustChangePassword?: boolean;
 }
 
 export interface CreateUserRequest {
 	fullName: string;
 	email: string;
+	password: string;
 	employeeCode?: string;
 	department?: string;
 	role?: UserRole;
+	hiredAt?: string;
 }
 
 export interface UpdateUserRequest {
@@ -34,7 +37,13 @@ export interface UpdateUserRequest {
 	employeeCode?: string;
 	department?: string;
 	role?: UserRole;
+	hiredAt?: string;
+}	
+
+export interface ResetPasswordRequest {
+	newPassword: string;
 }
+
 
 export interface ChangePasswordRequest {
 	currentPassword: string;
