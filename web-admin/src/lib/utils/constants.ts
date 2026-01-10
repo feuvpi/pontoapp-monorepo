@@ -37,6 +37,21 @@ export const RECORD_STATUS = {
 	REJECTED: 'Rejected'
 } as const;
 
+export const RECORD_TYPE_LABELS: Record<string, string> = {
+	ClockIn: 'Entrada',
+	ClockOut: 'Saída',
+	BreakStart: 'Início Intervalo',
+	BreakEnd: 'Fim Intervalo'
+};
+
+export const RECORD_STATUS_LABELS: Record<string, string> = {
+	Valid: 'Válido',
+	Pending: 'Pendente',
+	Rejected: 'Rejeitado'
+};
+
+
+
 /**
  * Date/Time formats (pt-BR)
  */
