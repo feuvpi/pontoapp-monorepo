@@ -12,77 +12,126 @@ namespace PontoAPP.Infrastructure.Multitenancy;
 /// 2. Subdomain (ex: empresa.pontoapp.com)
 /// 3. Query string "tenantId" (fallback)
 /// </summary>
-public class TenantResolver : ITenantResolver
+public class TenantResolver(IServiceProvider serviceProvider, ILogger<TenantResolver> logger)
+    : ITenantResolver
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<TenantResolver> _logger;
-
-    public TenantResolver(IServiceProvider serviceProvider, ILogger<TenantResolver> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
-
     public async Task<TenantInfo?> ResolveAsync(HttpContext httpContext)
+{
+    logger.LogInformation("========== TENANT RESOLVER START ==========");
+    
+    string? identifier = null;
+    string strategy = "unknown";
+    
+    // Log do estado de autenticação
+    logger.LogInformation("User IsAuthenticated: {IsAuth}", httpContext.User?.Identity?.IsAuthenticated);
+    logger.LogInformation("User Identity Name: {Name}", httpContext.User?.Identity?.Name);
+    
+    // Estratégia 1: JWT Claim (usuário autenticado)
+    if (httpContext.User.Identity?.IsAuthenticated == true)
     {
-        string? identifier = null;
-        string strategy = "unknown";
+        // LOG TODOS OS CLAIMS
+        var allClaims = httpContext.User.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
+        logger.LogInformation("All JWT Claims: {Claims}", string.Join(" | ", allClaims));
         
-        // Estratégia 1: JWT Claim (usuário autenticado)
-        if (httpContext.User.Identity?.IsAuthenticated == true)
+        // Tentar diferentes variações do nome do claim
+        var tenantClaim = httpContext.User.FindFirst("tenantId")?.Value;
+        
+        if (string.IsNullOrEmpty(tenantClaim))
         {
-            var tenantClaim = httpContext.User.FindFirst("tenantId")?.Value;
-            if (!string.IsNullOrEmpty(tenantClaim))
-            {
-                identifier = tenantClaim;
-                strategy = "jwt";
-            }
+            logger.LogWarning("Claim 'tenant_id' not found, trying 'tenantId'");
+            tenantClaim = httpContext.User.FindFirst("tenantId")?.Value;
         }
         
-        // Estratégia 2: Header X-Tenant-Id
-        if (string.IsNullOrEmpty(identifier) && 
-            httpContext.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantHeader))
+        if (string.IsNullOrEmpty(tenantClaim))
         {
-            identifier = tenantHeader.ToString();
-            strategy = "header";
+            logger.LogWarning("Claim 'tenantId' not found, trying 'TenantId'");
+            tenantClaim = httpContext.User.FindFirst("TenantId")?.Value;
         }
-
-        // Estratégia 3: Subdomain
-        if (string.IsNullOrEmpty(identifier))
+        
+        if (string.IsNullOrEmpty(tenantClaim))
         {
-            var host = httpContext.Request.Host.Host;
-            var parts = host.Split('.');
-            
-            if (parts.Length >= 3 && parts[0] != "www" && parts[0] != "api")
-            {
-                identifier = parts[0];
-                strategy = "subdomain";
-            }
+            logger.LogWarning("Claim 'TenantId' not found, trying 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/tenant'");
+            tenantClaim = httpContext.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/tenant")?.Value;
         }
-
-
-        // Estratégia 3: Query String (para testes)
-        if (string.IsNullOrEmpty(identifier) && httpContext.Request.Query.ContainsKey("tenantId"))
+        
+        if (!string.IsNullOrEmpty(tenantClaim))
         {
-            identifier = httpContext.Request.Query["tenantId"].ToString();
-            strategy = "querystring";
+            identifier = tenantClaim;
+            strategy = "jwt";
+            logger.LogInformation("✅ Tenant ID found in JWT: {TenantId}", tenantClaim);
         }
-
-        if (string.IsNullOrEmpty(identifier))
+        else
         {
-            _logger.LogWarning("No tenant identifier found in request");
-            return null;
+            logger.LogError("❌ NO TENANT CLAIM FOUND IN JWT!");
         }
-
-        return await GetTenantInfoAsync(identifier, strategy);
+    }
+    else
+    {
+        logger.LogWarning("User is NOT authenticated");
     }
     
+    // Estratégia 2: Header X-Tenant-Id
+    if (string.IsNullOrEmpty(identifier) && 
+        httpContext.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantHeader))
+    {
+        identifier = tenantHeader.ToString();
+        strategy = "header";
+        logger.LogInformation("✅ Tenant ID found in Header: {TenantId}", identifier);
+    }
+
+    // Estratégia 3: Subdomain
+    if (string.IsNullOrEmpty(identifier))
+    {
+        var host = httpContext.Request.Host.Host;
+        logger.LogInformation("Host: {Host}", host);
+        
+        var parts = host.Split('.');
+        
+        if (parts.Length >= 3 && parts[0] != "www" && parts[0] != "api")
+        {
+            identifier = parts[0];
+            strategy = "subdomain";
+            logger.LogInformation("✅ Tenant ID found in Subdomain: {TenantId}", identifier);
+        }
+    }
+
+    // Estratégia 4: Query String (para testes)
+    if (string.IsNullOrEmpty(identifier) && httpContext.Request.Query.ContainsKey("tenantId"))
+    {
+        identifier = httpContext.Request.Query["tenantId"].ToString();
+        strategy = "querystring";
+        logger.LogInformation("✅ Tenant ID found in QueryString: {TenantId}", identifier);
+    }
+
+    if (string.IsNullOrEmpty(identifier))
+    {
+        logger.LogError("❌ NO TENANT IDENTIFIER FOUND - All strategies failed");
+        logger.LogInformation("========== TENANT RESOLVER END (FAILED) ==========");
+        return null;
+    }
+
+    logger.LogInformation("Tenant identifier: {Identifier} (strategy: {Strategy})", identifier, strategy);
     
+    var result = await GetTenantInfoAsync(identifier, strategy);
+    
+    if (result != null)
+    {
+        logger.LogInformation("✅ Tenant resolved successfully: {TenantName} ({TenantId})", result.TenantName, result.TenantId);
+    }
+    else
+    {
+        logger.LogError("❌ GetTenantInfoAsync returned NULL");
+    }
+    
+    logger.LogInformation("========== TENANT RESOLVER END ==========");
+    return result;
+    
+}
     
     
     private async Task<TenantInfo?> GetTenantInfoAsync(string identifier, string strategy)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         var tenant = Guid.TryParse(identifier, out var tenantId)
@@ -95,12 +144,12 @@ public class TenantResolver : ITenantResolver
 
         if (tenant == null)
         {
-            _logger.LogWarning("Tenant not found: {Identifier} (strategy: {Strategy})", 
+            logger.LogWarning("Tenant not found: {Identifier} (strategy: {Strategy})", 
                 identifier, strategy);
             return null;
         }
 
-        _logger.LogDebug("Tenant resolved: {TenantName} (strategy: {Strategy})", 
+        logger.LogDebug("Tenant resolved: {TenantName} (strategy: {Strategy})", 
             tenant.Name, strategy);
 
         return new TenantInfo(tenant.Id, tenant.Name, tenant.Slug, tenant.IsActive);

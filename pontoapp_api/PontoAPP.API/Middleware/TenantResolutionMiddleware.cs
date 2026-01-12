@@ -94,16 +94,29 @@ public class TenantResolutionMiddleware(
 
     private static bool IsPublicEndpoint(string path)
     {
-        var publicPaths = new[]
+        // Lista de endpoints públicos (match exato ou startsWith)
+        var publicExactPaths = new[]
+        {
+            "/api/v1/tenants",  // Apenas POST /tenants (criar tenant)
+        };
+    
+        var publicPrefixPaths = new[]
         {
             "/health",
             "/swagger",
-            "/api/v1/tenants", 
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/auth/refresh"
         };
 
-        return publicPaths.Any(p => path.StartsWith(p));
+        // Check exact match
+        if (publicExactPaths.Contains(path))
+            return true;
+
+        // Check prefix match
+        if (publicPrefixPaths.Any(p => path.StartsWith(p)))
+            return true;
+
+        return false;
     }
 }

@@ -60,9 +60,19 @@ public class Tenant : BaseEntity, IAuditableEntity
 
     public void Activate() => IsActive = true;
     public void Deactivate() => IsActive = false;
+    
+    public void Update(string name, string email, string companyDocument)
+    {
+        Name = name;
+        Email = Email.Value == email ? Email : Email.Create(email);
+        CompanyDocument = companyDocument;
+        UpdatedAt = DateTime.UtcNow;
+    }
 
     private static bool IsValidSlug(string slug)
     {
         return slug.All(c => char.IsLetterOrDigit(c) || c == '-' || c == '_');
     }
+    
+    
 }

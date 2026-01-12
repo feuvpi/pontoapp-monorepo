@@ -1,8 +1,13 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PontoAPP.Application.Commands.Tenants;
 using PontoAPP.Application.DTOs.Tenants;
+using PontoAPP.Application.Exceptions;
+using PontoAPP.Application.Queries.Tenants;
 using PontoAPP.Application.Validators.Tenants;
+using PontoAPP.Infrastructure.Multitenancy;
+using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
 
 namespace PontoAPP.API.Controllers.V1;
 
@@ -12,18 +17,13 @@ namespace PontoAPP.API.Controllers.V1;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Tags("Tenants")]
-public class TenantsController : BaseController
+public class TenantsController(
+    IMediator mediator,
+    ILogger<TenantsController> logger,
+    CreateTenantRequestValidator validator,
+    ITenantAccessor tenantAccessor)
+    : BaseController(mediator, logger)
 {
-    private readonly CreateTenantRequestValidator _validator;
-
-    public TenantsController(
-        IMediator mediator,
-        ILogger<TenantsController> logger,
-        CreateTenantRequestValidator validator) : base(mediator, logger)
-    {
-        _validator = validator;
-    }
-
     /// <summary>
     /// Creates a new tenant (company) with dedicated database schema
     /// </summary>
@@ -62,7 +62,7 @@ public class TenantsController : BaseController
         try
         {
             // Validate request
-            var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
             {
                 var errors = validationResult.Errors
@@ -126,5 +126,60 @@ public class TenantsController : BaseController
     {
         // TODO: Implement GetTenantByIdQuery
         return NotFound("Tenant not found");
+    }
+    
+    /// <summary>
+    /// Obtém dados do tenant atual
+    /// </summary>
+    [HttpGet("current")]
+    [Authorize]
+    [ProducesResponseType(typeof(TenantResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCurrentTenant(CancellationToken cancellationToken)
+    {
+        var tenantInfo = tenantAccessor.GetTenantInfo();
+
+        var teste = 1;
+        var query = new GetTenantByIdQuery { TenantId = tenantInfo.TenantId };
+        var result = await Mediator.Send(query, cancellationToken);
+    
+        return Ok(result);
+    }
+    
+    /// <summary>
+    /// Atualiza dados do tenant atual (apenas Admin)
+    /// </summary>
+    [HttpPut("current")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(TenantResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateCurrentTenant(
+        [FromBody] UpdateTenantRequest request,
+        CancellationToken cancellationToken)
+    {
+        var tenantInfo = tenantAccessor.GetTenantInfo();
+        if (tenantInfo == null)
+            return BadRequest("Tenant não identificado");
+
+        var command = new UpdateTenantCommand
+        {
+            TenantId = tenantInfo.TenantId,
+            Name = request.Name,
+            Email = request.Email,
+            CompanyDocument = request.CompanyDocument
+        };
+
+        try
+        {
+            var result = await Mediator.Send(command, cancellationToken);
+            return Ok(result);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

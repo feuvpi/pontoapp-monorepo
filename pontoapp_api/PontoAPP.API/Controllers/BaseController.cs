@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PontoAPP.Application.DTOs.Common;
 
@@ -75,4 +76,20 @@ public abstract class BaseController : ControllerBase
     {
         return StatusCode(500, ErrorResponse.InternalServerError(message));
     }
+    
+    /// <summary>
+    /// Gets the current user ID from JWT claims
+    /// </summary>
+    protected Guid? GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                          ?? User.FindFirst("sub")?.Value
+                          ?? User.FindFirst("user_id")?.Value;
+
+        if (Guid.TryParse(userIdClaim, out var userId))
+            return userId;
+
+        return null;
+    }
+
 }

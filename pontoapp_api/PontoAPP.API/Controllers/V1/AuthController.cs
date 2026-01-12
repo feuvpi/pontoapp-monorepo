@@ -1,18 +1,19 @@
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PontoAPP.Application.Commands.Auth;
 using PontoAPP.Application.DTOs.Auth;
+using PontoAPP.Application.Exceptions;
 
 namespace PontoAPP.API.Controllers.V1;
 
 [ApiController]
 [Route("api/v1/[controller]")]
 [Tags("Auth")]
-public class AuthController(IMediator mediator, ILogger<AuthController> logger) : ControllerBase
+public class AuthController(IMediator mediator, ILogger<AuthController> logger) 
+    : BaseController(mediator, logger)
 {
-    private readonly ILogger<AuthController> _logger = logger;
-
     /// <summary>
     /// Registra uma nova empresa + usuário admin
     /// </summary>
@@ -33,8 +34,8 @@ public class AuthController(IMediator mediator, ILogger<AuthController> logger) 
             Password = request.Password
         };
 
-        var result = await mediator.Send(command, cancellationToken);
-        return StatusCode(StatusCodes.Status201Created, result);
+        var result = await Mediator.Send(command, cancellationToken);
+        return Created(result, "Tenant created successfully");
     }
 
     /// <summary>
@@ -54,8 +55,8 @@ public class AuthController(IMediator mediator, ILogger<AuthController> logger) 
             Password = request.Password
         };
 
-        var result = await mediator.Send(command, cancellationToken);
-        return Ok(result);
+        var result = await Mediator.Send(command, cancellationToken);
+        return Success(result);
     }
 
     /// <summary>
@@ -74,7 +75,44 @@ public class AuthController(IMediator mediator, ILogger<AuthController> logger) 
             RefreshToken = request.RefreshToken
         };
 
-        var result = await mediator.Send(command, cancellationToken);
-        return Ok(result);
+        var result = await Mediator.Send(command, cancellationToken);
+        return Success(result);
+    }
+    
+    /// <summary>
+    /// Troca a senha do usuário logado
+    /// </summary>
+    [HttpPost("change-password")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] ChangePasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+            return Unauthorized("Usuário não identificado");
+
+        var command = new ChangePasswordCommand
+        {
+            UserId = userId.Value,
+            CurrentPassword = request.CurrentPassword,
+            NewPassword = request.NewPassword
+        };
+
+        try
+        {
+            await Mediator.Send(command, cancellationToken);
+            return Success(new { message = "Senha alterada com sucesso" });
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

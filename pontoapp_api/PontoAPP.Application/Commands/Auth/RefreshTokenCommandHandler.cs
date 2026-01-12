@@ -8,28 +8,18 @@ using PontoAPP.Infrastructure.Identity;
 
 namespace PontoAPP.Application.Commands.Auth;
 
-public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, LoginResponse>
+public class RefreshTokenCommandHandler(
+    IUserRepository userRepository,
+    ITenantRepository tenantRepository,
+    IJwtTokenService jwtTokenService,
+    ILogger<RefreshTokenCommandHandler> logger)
+    : IRequestHandler<RefreshTokenCommand, LoginResponse>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly ITenantRepository _tenantRepository;
-    private readonly IJwtTokenService _jwtTokenService;
-    private readonly ILogger<RefreshTokenCommandHandler> _logger;
-
-    public RefreshTokenCommandHandler(
-        IUserRepository userRepository,
-        ITenantRepository tenantRepository,
-        IJwtTokenService jwtTokenService,
-        ILogger<RefreshTokenCommandHandler> logger)
-    {
-        _userRepository = userRepository;
-        _tenantRepository = tenantRepository;
-        _jwtTokenService = jwtTokenService;
-        _logger = logger;
-    }
+    private readonly ILogger<RefreshTokenCommandHandler> _logger = logger;
 
     public async Task<LoginResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
+        var user = await userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
 
         if (user == null)
         {
@@ -46,13 +36,13 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, L
             throw new BusinessException("Usuário inativo.");
         }
 
-        var tenant = await _tenantRepository.GetByIdAsync(user.TenantId, cancellationToken);
+        var tenant = await tenantRepository.GetByIdAsync(user.TenantId, cancellationToken);
         if (tenant == null || !tenant.IsActive)
         {
             throw new BusinessException("Empresa inativa.");
         }
 
-        var token = _jwtTokenService.GenerateAccessToken(
+        var token = jwtTokenService.GenerateAccessToken(
             userId: user.Id,
             tenantId: tenant.Id,
             email: user.Email.Value,
@@ -64,12 +54,12 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, L
             }
         );
 
-        var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
-        var expiresAt = _jwtTokenService.GetTokenExpirationTime(token) ?? DateTime.UtcNow.AddHours(1);
+        var newRefreshToken = jwtTokenService.GenerateRefreshToken();
+        var expiresAt = jwtTokenService.GetTokenExpirationTime(token) ?? DateTime.UtcNow.AddHours(1);
 
         user.SetRefreshToken(newRefreshToken, DateTime.UtcNow.AddDays(7));
-        _userRepository.Update(user);
-        await _userRepository.SaveChangesAsync(cancellationToken);
+        userRepository.Update(user);
+        await userRepository.SaveChangesAsync(cancellationToken);
 
         return new LoginResponse
         {

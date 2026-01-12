@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PontoAPP.Application.Behaviours;
+using PontoAPP.Application.Queries.Tenants;
 using PontoAPP.Domain.Repositories;
 using PontoAPP.Domain.Services;
 using PontoAPP.Infrastructure.Data.Context;
@@ -12,6 +13,7 @@ using PontoAPP.Infrastructure.Data.Repositories;
 using PontoAPP.Infrastructure.Identity;
 using PontoAPP.Infrastructure.Multitenancy;
 using PontoAPP.Infrastructure.Services;
+using PontoAPP.Application.Commands.Tenants; 
 
 namespace PontoAPP.API.Extensions;
 
@@ -92,6 +94,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddMediatR(cfg =>
         {
+            cfg.RegisterServicesFromAssemblyContaining<GetTenantByIdQuery>();
+
             cfg.RegisterServicesFromAssembly(typeof(ValidationBehavior<,>).Assembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
