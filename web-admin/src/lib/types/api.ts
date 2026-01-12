@@ -23,13 +23,17 @@ export interface PaginatedResponse<T> {
 export interface LoginResponse {
 	token: string;
 	refreshToken: string;
-	expiresAt: string;
+	expiresAt: string;  // ISO string
+	tenantId: string;
 	user: {
 		id: string;
-		email: string;
 		fullName: string;
+		email: string;
 		role: string;
+		isActive: boolean;
 		mustChangePassword: boolean;
+		employeeCode?: string;
+		department?: string;
 	};
 }
 
