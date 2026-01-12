@@ -1,12 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
-
 @import "tw-animate-css";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
@@ -124,4 +127,38 @@
     font-family: 'Inter', system-ui, sans-serif;
 
   }
+
+  h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Utilitário para Bordas Semitransparentes (Glassmorphism) */
+.glass-card {
+  background: color-mix(in oklch, var(--background), transparent 20%);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklch, var(--foreground), transparent 90%);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border: 1px solid color-mix(in oklch, var(--primary), transparent 70%);
+}
+
+/* Animação Marquee para Logos */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
 }
