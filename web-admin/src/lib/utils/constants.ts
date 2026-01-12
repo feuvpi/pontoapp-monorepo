@@ -1,7 +1,6 @@
 /**
  * Application Constants
  */
-
 export const APP_NAME = 'PontoApp';
 
 export const USER_ROLES = {
@@ -18,23 +17,11 @@ export const USER_ROLE_LABELS: Record<string, string> = {
 	Employee: 'Funcionário'
 };
 
-export const USER_STATUS = {
-	ACTIVE: 'Active',
-	INACTIVE: 'Inactive',
-	PENDING: 'Pending'
-} as const;
-
 export const RECORD_TYPES = {
 	CLOCK_IN: 'ClockIn',
 	CLOCK_OUT: 'ClockOut',
 	BREAK_START: 'BreakStart',
 	BREAK_END: 'BreakEnd'
-} as const;
-
-export const RECORD_STATUS = {
-	VALID: 'Valid',
-	PENDING: 'Pending',
-	REJECTED: 'Rejected'
 } as const;
 
 export const RECORD_TYPE_LABELS: Record<string, string> = {
@@ -44,13 +31,17 @@ export const RECORD_TYPE_LABELS: Record<string, string> = {
 	BreakEnd: 'Fim Intervalo'
 };
 
+export const RECORD_STATUS = {
+	VALID: 'Valid',
+	PENDING: 'Pending',
+	REJECTED: 'Rejected'
+} as const;
+
 export const RECORD_STATUS_LABELS: Record<string, string> = {
 	Valid: 'Válido',
 	Pending: 'Pendente',
 	Rejected: 'Rejeitado'
 };
-
-
 
 /**
  * Date/Time formats (pt-BR)
@@ -83,29 +74,36 @@ export const STORAGE_KEYS = {
 
 /**
  * API endpoints
+ * IMPORTANTE: A API usa rotas com MAIÚSCULA (Auth, Users, Tenants, TimeRecords)
  */
 export const API_ENDPOINTS = {
 	AUTH: {
-		LOGIN: '/auth/login',
-		REFRESH: '/auth/refresh',
-		LOGOUT: '/auth/logout',
-		CHANGE_PASSWORD: '/auth/change-password'
+		LOGIN: '/Auth/login',           // ← Era /auth/login
+		REGISTER: '/Auth/register',
+		REFRESH: '/Auth/refresh',
+		LOGOUT: '/Auth/logout',
+		CHANGE_PASSWORD: '/Auth/change-password'
 	},
 	USERS: {
-		LIST: '/users',
-		GET: (id: string) => `/users/${id}`,
-		CREATE: '/users',
-		UPDATE: (id: string) => `/users/${id}`,
-		DELETE: (id: string) => `/users/${id}`,
-		ACTIVATE: (id: string) => `/users/${id}/activate`,
-		DEACTIVATE: (id: string) => `/users/${id}/deactivate`
+		LIST: '/Users',                 // ← Era /users
+		GET: (id: string) => `/Users/${id}`,
+		CREATE: '/Users',
+		UPDATE: (id: string) => `/Users/${id}`,
+		DELETE: (id: string) => `/Users/${id}`,
+		ACTIVATE: (id: string) => `/Users/${id}/activate`,
+		RESET_PASSWORD: (id: string) => `/Users/${id}/reset-password`
+	},
+	TENANTS: {
+		CURRENT: '/Tenants/current',    // ← Correto!
+		UPDATE: '/Tenants/current'
 	},
 	TIME_RECORDS: {
-		LIST: '/time-records',
-		GET: (id: string) => `/time-records/${id}`,
-		BY_USER: (userId: string) => `/time-records/user/${userId}`,
-		CREATE: '/time-records',
-		UPDATE: (id: string) => `/time-records/${id}`,
-		DELETE: (id: string) => `/time-records/${id}`
+		LIST: '/TimeRecords',           // ← Era /time-records
+		GET: (id: string) => `/TimeRecords/${id}`,
+		BY_USER: (userId: string) => `/TimeRecords/users/${userId}/records`,
+		MANUAL: '/TimeRecords/manual',
+		CREATE: '/TimeRecords',
+		UPDATE: (id: string) => `/TimeRecords/${id}`,
+		DELETE: (id: string) => `/TimeRecords/${id}`
 	}
 } as const;
