@@ -3,16 +3,16 @@ namespace PontoAPP.Domain.ValueObjects;
 /// <summary>
 /// Value Object para PIS/PASEP com validação
 /// </summary>
-public sealed class Pis
+public sealed class PIS
 {
     public string Value { get; }
 
-    private Pis(string value)
+    private PIS(string value)
     {
         Value = value;
     }
 
-    public static Pis Create(string pis)
+    public static PIS Create(string pis)
     {
         if (string.IsNullOrWhiteSpace(pis))
             throw new ArgumentException("PIS cannot be empty", nameof(pis));
@@ -26,7 +26,7 @@ public sealed class Pis
         if (!IsValid(cleanPis))
             throw new ArgumentException("Invalid PIS", nameof(pis));
 
-        return new Pis(cleanPis);
+        return new PIS(cleanPis);
     }
 
     private static bool IsValid(string pis)
@@ -60,7 +60,7 @@ public sealed class Pis
 
     public override bool Equals(object? obj)
     {
-        if (obj is not Pis other)
+        if (obj is not PIS other)
             return false;
 
         return Value == other.Value;
@@ -68,5 +68,5 @@ public sealed class Pis
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    public static implicit operator string(Pis pis) => pis.Value;
+    public static implicit operator string(PIS pis) => pis.Value;
 }

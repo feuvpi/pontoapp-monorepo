@@ -4,35 +4,40 @@ namespace PontoAPP.Domain.ValueObjects;
 
 /// <summary>
 /// Value Object para CPF com validação
+/// Armazena apenas os 11 dígitos (sem formatação)
 /// </summary>
-public sealed class Cpf
+public sealed class CPF
 {
-    private static readonly Regex CpfRegex = new(
+    private static readonly Regex CPFRegex = new(
         @"^\d{11}$",
         RegexOptions.Compiled);
 
     public string Value { get; private set; }
 
-    private Cpf(string value)
+    private CPF(string value)
     {
         Value = value;
     }
 
-    public static Cpf Create(string cpf)
+    /// <summary>
+    /// Cria um CPF validado
+    /// Aceita formato com ou sem pontuação: "12345678901" ou "123.456.789-01"
+    /// </summary>
+    public static CPF Create(string cpf)
     {
         if (string.IsNullOrWhiteSpace(cpf))
             throw new ArgumentException("CPF cannot be empty", nameof(cpf));
 
-        // Remove caracteres não numéricos
+        // Remove caracteres não numéricos (pontos, traços)
         var cleanCPF = new string(cpf.Where(char.IsDigit).ToArray());
 
-        if (!CpfRegex.IsMatch(cleanCPF))
+        if (!CPFRegex.IsMatch(cleanCPF))
             throw new ArgumentException("CPF must have 11 digits", nameof(cpf));
 
         if (!IsValid(cleanCPF))
             throw new ArgumentException("Invalid CPF", nameof(cpf));
 
-        return new Cpf(cleanCPF);
+        return new CPF(cleanCPF);
     }
 
     private static bool IsValid(string cpf)
@@ -75,7 +80,7 @@ public sealed class Cpf
 
     public override bool Equals(object? obj)
     {
-        if (obj is not Cpf other)
+        if (obj is not CPF other)
             return false;
 
         return Value == other.Value;
@@ -83,5 +88,5 @@ public sealed class Cpf
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    public static implicit operator string(Cpf cpf) => cpf.Value;
+    public static implicit operator string(CPF cpf) => cpf.Value;
 }

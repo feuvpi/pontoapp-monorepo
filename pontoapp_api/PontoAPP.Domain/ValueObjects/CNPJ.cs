@@ -3,16 +3,16 @@ namespace PontoAPP.Domain.ValueObjects;
 /// <summary>
 /// Value Object para CNPJ com validação
 /// </summary>
-public sealed class Cnpj
+public sealed class CNPJ
 {
     public string Value { get; private set; }
 
-    private Cnpj(string value)
+    private CNPJ(string value)
     {
         Value = value;
     }
 
-    public static Cnpj Create(string cnpj)
+    public static CNPJ Create(string cnpj)
     {
         if (string.IsNullOrWhiteSpace(cnpj))
             throw new ArgumentException("CNPJ cannot be empty", nameof(cnpj));
@@ -26,7 +26,7 @@ public sealed class Cnpj
         if (!IsValid(cleanCnpj))
             throw new ArgumentException("Invalid CNPJ", nameof(cnpj));
 
-        return new Cnpj(cleanCnpj);
+        return new CNPJ(cleanCnpj);
     }
 
     private static bool IsValid(string cnpj)
@@ -73,7 +73,7 @@ public sealed class Cnpj
 
     public override bool Equals(object? obj)
     {
-        if (obj is not Cnpj other)
+        if (obj is not CNPJ other)
             return false;
 
         return Value == other.Value;
@@ -81,5 +81,5 @@ public sealed class Cnpj
 
     public override int GetHashCode() => Value.GetHashCode();
 
-    public static implicit operator string(Cnpj cnpj) => cnpj.Value;
+    public static implicit operator string(CNPJ cnpj) => cnpj.Value;
 }
