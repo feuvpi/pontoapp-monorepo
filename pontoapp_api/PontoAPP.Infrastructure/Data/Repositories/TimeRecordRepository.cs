@@ -85,4 +85,5 @@ public class TimeRecordRepository : GenericRepository<TimeRecord>, ITimeRecordRe
                              tr.RecordedAt < endOfDay,
                 cancellationToken);
     }
+    
 }

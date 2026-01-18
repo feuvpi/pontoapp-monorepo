@@ -19,5 +19,9 @@ public interface ITimeRecordRepository : IGenericRepository<TimeRecord>
         CancellationToken cancellationToken = default);
     Task<TimeRecord?> GetLastRecordByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<IEnumerable<TimeRecord>> GetPendingRecordsAsync(CancellationToken cancellationToken = default);
-    Task<int> GetRecordsCountByUserAndDateAsync(Guid userId, DateTime date, CancellationToken cancellationToken = default);
+
+    Task<int> GetRecordsCountByUserAndDateAsync(Guid userId, DateTime date,
+        CancellationToken cancellationToken = default);
+
+
 }
