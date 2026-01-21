@@ -1,4 +1,3 @@
-// PontoAPP.Domain/Entities/Identity/User.cs
 using PontoAPP.Domain.Entities.Common;
 using PontoAPP.Domain.Entities.TimeTracking;
 using PontoAPP.Domain.Enums;
@@ -6,6 +5,9 @@ using PontoAPP.Domain.ValueObjects;
 
 namespace PontoAPP.Domain.Entities.Identity;
 
+/// <summary>
+/// Representa um usuário (funcionário) do sistema
+/// </summary>
 public class User : BaseEntity, ITenantEntity, IAuditableEntity
 {
     public Guid TenantId { get; set; }
@@ -17,12 +19,16 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
     public bool IsActive { get; private set; }
     public string? BiometricHash { get; private set; }
     
+    // Documentos - Portaria 671
+    public CPF? CPF { get; private set; } = null!; // Obrigatório
+    public PIS? PIS { get; private set; } // Opcional (por enquanto)
+    
     // Informações adicionais
     public string? EmployeeCode { get; private set; }
     public string? Department { get; private set; }
     public DateTime? HiredAt { get; private set; }
     
-    // Auth - NOVOS CAMPOS
+    // Auth
     public bool MustChangePassword { get; private set; }
     public string? RefreshToken { get; private set; }
     public DateTime? RefreshTokenExpiresAt { get; private set; }
@@ -41,7 +47,9 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
     private User(
         Guid tenantId, 
         string fullName, 
-        Email email, 
+        Email email,
+        CPF? cpf,
+        PIS? pis,
         string passwordHash, 
         UserRole role,
         bool mustChangePassword,
@@ -51,6 +59,8 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
         TenantId = tenantId;
         FullName = fullName;
         Email = email;
+        CPF = cpf;
+        PIS = pis;
         PasswordHash = passwordHash;
         Role = role;
         IsActive = true;
@@ -63,6 +73,8 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
         Guid tenantId,
         string fullName,
         string email,
+        string cpf,
+        string? pis, // Opcional
         string passwordHash,
         UserRole role = UserRole.Employee,
         bool mustChangePassword = false,
@@ -74,10 +86,29 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
 
         if (string.IsNullOrWhiteSpace(passwordHash))
             throw new ArgumentException("Password hash is required", nameof(passwordHash));
-
+        CPF? cpfVO = null;
         var emailVO = Email.Create(email);
+        if (!string.IsNullOrWhiteSpace(cpf))
+            cpfVO = CPF.Create(cpf);
+        
+        // PIS é opcional
+        PIS? pisVO = null;
+        if (!string.IsNullOrWhiteSpace(pis))
+        {
+            pisVO = PIS.Create(pis);
+        }
 
-        return new User(tenantId, fullName, emailVO, passwordHash, role, mustChangePassword, employeeCode, department);
+        return new User(
+            tenantId, 
+            fullName, 
+            emailVO, 
+            cpfVO, 
+            pisVO, 
+            passwordHash, 
+            role, 
+            mustChangePassword, 
+            employeeCode, 
+            department);
     }
 
     /// <summary>
@@ -87,12 +118,16 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
         Guid tenantId,
         string fullName,
         string email,
+        string cpf,
+        string? pis,
         string passwordHash)
     {
         return Create(
             tenantId: tenantId,
             fullName: fullName,
             email: email,
+            cpf: cpf,
+            pis: pis,
             passwordHash: passwordHash,
             role: UserRole.Admin,
             mustChangePassword: false
@@ -106,6 +141,8 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
         Guid tenantId,
         string fullName,
         string email,
+        string cpf,
+        string? pis,
         string passwordHash,
         string? employeeCode = null,
         string? department = null)
@@ -114,9 +151,11 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
             tenantId: tenantId,
             fullName: fullName,
             email: email,
+            cpf: cpf,
+            pis: pis,
             passwordHash: passwordHash,
             role: UserRole.Employee,
-            mustChangePassword: true, // Funcionário deve trocar senha no primeiro login
+            mustChangePassword: true,
             employeeCode: employeeCode,
             department: department
         );
@@ -128,7 +167,7 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
             throw new ArgumentException("Password hash is required", nameof(newPasswordHash));
 
         PasswordHash = newPasswordHash;
-        MustChangePassword = false; // Após trocar senha, não precisa mais
+        MustChangePassword = false;
     }
 
     public void SetRefreshToken(string token, DateTime expiresAt)
@@ -174,18 +213,62 @@ public class User : BaseEntity, ITenantEntity, IAuditableEntity
 
         EmployeeCode = employeeCode;
         Department = department;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateDocuments(string? cpf, string? pis)
+    {
+        if (!string.IsNullOrWhiteSpace(cpf))
+        {
+            CPF = CPF.Create(cpf);
+        }
+
+        if (!string.IsNullOrWhiteSpace(pis))
+        {
+            PIS = PIS.Create(pis);
+        }
+        
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Verifica se o usuário tem todos os documentos necessários para bater ponto
+    /// (Para exportação de AFD, PIS é obrigatório)
+    /// </summary>
+    public bool HasRequiredDocuments()
+    {
+        return PIS != null;
+    }
+
+    /// <summary>
+    /// Verifica se pode exportar dados fiscais (AFD)
+    /// </summary>
+    public bool CanExportToAFD()
+    {
+        return HasRequiredDocuments() && IsActive;
     }
 
     public void ChangeRole(UserRole newRole)
     {
         Role = newRole;
+        UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Activate() => IsActive = true;
-    public void Deactivate() => IsActive = false;
+    public void Activate() 
+    {
+        IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public void Deactivate() 
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
 
     public void SetHiredDate(DateTime hiredAt)
     {
         HiredAt = hiredAt;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
