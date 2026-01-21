@@ -83,7 +83,7 @@ public class TenantsController(
                 Name = request.Name,
                 Slug = request.Slug.ToLowerInvariant(),
                 Email = request.Email,
-                CompanyDocument = request.CompanyDocument
+                Cnpj = request.CompanyDocument
             };
 
             var result = await Mediator.Send(command, cancellationToken);

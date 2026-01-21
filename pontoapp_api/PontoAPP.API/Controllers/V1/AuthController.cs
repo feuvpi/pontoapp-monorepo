@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +34,7 @@ public class AuthController(IMediator mediator, ILogger<AuthController> logger)
         };
 
         var result = await Mediator.Send(command, cancellationToken);
-        return Created(result, "Tenant created successfully");
+        return StatusCode(StatusCodes.Status201Created, result);  // ← SEM Success()
     }
 
     /// <summary>
@@ -56,7 +55,7 @@ public class AuthController(IMediator mediator, ILogger<AuthController> logger)
         };
 
         var result = await Mediator.Send(command, cancellationToken);
-        return Success(result);
+        return Ok(result);  // ← SEM Success()
     }
 
     /// <summary>
@@ -76,7 +75,7 @@ public class AuthController(IMediator mediator, ILogger<AuthController> logger)
         };
 
         var result = await Mediator.Send(command, cancellationToken);
-        return Success(result);
+        return Ok(result);  // ← SEM Success()
     }
     
     /// <summary>
@@ -104,7 +103,7 @@ public class AuthController(IMediator mediator, ILogger<AuthController> logger)
         try
         {
             await Mediator.Send(command, cancellationToken);
-            return Success(new { message = "Senha alterada com sucesso" });
+            return Ok(new { message = "Senha alterada com sucesso" });  // ← OK aqui
         }
         catch (ValidationException ex)
         {

@@ -62,11 +62,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITimeRecordRepository, TimeRecordRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDeviceRepository, DeviceRepository>();
+        services.AddScoped<ITimeRecordAdjustmentRepository, TimeRecordAdjustmentRepository>();
         return services;
     }
 
     public static IServiceCollection AddPontoAppServices(this IServiceCollection services)
     {
+        // Domain Services - Portaria 671
+        services.AddScoped<INSRGenerator, NSRGenerator>();
+        services.AddScoped<ISignatureGenerator, SignatureGenerator>();
         // Removido: ITenantSchemaService
         services.AddScoped<IDomainEventService, DomainEventService>();
 
