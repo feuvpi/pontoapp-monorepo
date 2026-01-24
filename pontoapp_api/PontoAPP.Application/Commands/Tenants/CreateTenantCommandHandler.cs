@@ -36,7 +36,7 @@ public class CreateTenantCommandHandler(
             name: request.Name,
             slug: request.Slug,
             email: request.Email,
-            companyDocument: request.CompanyDocument
+            cnpj: request.Cnpj
         );
 
         // 3. Create Subscription (trial)
@@ -91,7 +91,7 @@ public class CreateTenantCommandHandler(
             Name = tenant.Name,
             Slug = tenant.Slug,
             Email = tenant.Email.Value,
-            CompanyDocument = tenant.CompanyDocument,
+            CompanyDocument = tenant.CNPJ,
             IsActive = tenant.IsActive,
             CreatedAt = tenant.CreatedAt,
             Subscription = new SubscriptionInfo

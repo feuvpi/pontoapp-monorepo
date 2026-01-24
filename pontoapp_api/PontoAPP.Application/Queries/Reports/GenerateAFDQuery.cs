@@ -1,4 +1,3 @@
-
 using MediatR;
 
 namespace PontoAPP.Application.Queries.Reports;

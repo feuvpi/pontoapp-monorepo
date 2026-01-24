@@ -7,13 +7,14 @@ namespace PontoAPP.Infrastructure.Data.Configurations.System;
 public class TenantConfiguration : IEntityTypeConfiguration<Domain.Entities.Tenants.Tenant>
 {
     public void Configure(EntityTypeBuilder<Domain.Entities.Tenants.Tenant> builder)
+    
     {
         builder.ToTable("tenants", "public");
 
         builder.HasKey(t => t.Id);
 
         builder.Property(t => t.Id)
-            .ValueGeneratedNever(); // ID é gerado no domínio
+            .ValueGeneratedNever();
 
         builder.Property(t => t.Name)
             .IsRequired()
@@ -25,7 +26,6 @@ public class TenantConfiguration : IEntityTypeConfiguration<Domain.Entities.Tena
 
         builder.HasIndex(t => t.Slug)
             .IsUnique();
-        
 
         // Value Object Email
         builder.OwnsOne(t => t.Email, email =>
@@ -34,11 +34,28 @@ public class TenantConfiguration : IEntityTypeConfiguration<Domain.Entities.Tena
                 .HasColumnName("email")
                 .IsRequired()
                 .HasMaxLength(255);
-
-            email.HasIndex(e => e.Value);
         });
 
-        builder.Property(t => t.CompanyDocument)
+        // Value Object CNPJ - CORRIGIDO
+        builder.OwnsOne(t => t.CNPJ, cnpj =>
+        {
+            cnpj.Property(c => c.Value)
+                .HasColumnName("cnpj")
+                .IsRequired()
+                .HasMaxLength(14)
+                .IsFixedLength();
+            
+            // Índice único dentro do OwnsOne
+            cnpj.HasIndex(c => c.Value)
+                .HasDatabaseName("IX_tenants_cnpj")
+                .IsUnique();
+        });
+
+        builder.Property(t => t.CEI)
+            .HasMaxLength(12)
+            .IsFixedLength();
+
+        builder.Property(t => t.InscricaoEstadual)
             .HasMaxLength(20);
 
         builder.Property(t => t.IsActive)
@@ -56,10 +73,5 @@ public class TenantConfiguration : IEntityTypeConfiguration<Domain.Entities.Tena
         builder.Property(t => t.UpdatedBy)
             .HasMaxLength(100);
 
-        // Relacionamento com Subscription (1:1)
-        builder.HasOne(t => t.Subscription)
-            .WithOne(s => s.Tenant)
-            .HasForeignKey<Subscription>(s => s.TenantId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

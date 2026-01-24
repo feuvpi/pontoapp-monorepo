@@ -18,7 +18,7 @@ public class TenantNSRCounter : BaseEntity
     // EF Constructor
     private TenantNSRCounter() { }
 
-    private TenantNSRCounter(Guid tenantId, long currentNSR = 0)
+    public TenantNSRCounter(Guid tenantId, long currentNSR = 0)
     {
         TenantId = tenantId;
         CurrentNSR = currentNSR;

@@ -1,4 +1,3 @@
-// PontoAPP.Domain/Models/Reports/ACJEFModel.cs
 namespace PontoAPP.Domain.Models.Reports;
 
 public class ACJEFModel

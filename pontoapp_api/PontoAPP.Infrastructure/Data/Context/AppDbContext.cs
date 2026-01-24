@@ -39,6 +39,13 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<TimeRecord> TimeRecords => Set<TimeRecord>();
     public DbSet<Device> Devices => Set<Device>();
+    
+    public DbSet<TimeRecordAdjustment> TimeRecordAdjustments { get; set; }
+    
+    public DbSet<TenantNSRCounter> TenantNSRCounters { get; set; }
+    
+    public DbSet<WorkSchedule> WorkSchedules { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,6 +61,7 @@ public class AppDbContext : DbContext
         // Tenant configurations
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new TimeRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new TenantNSRCounterConfiguration());
         
         // Global query filters para multi-tenancy
         var tenantId = _tenantAccessor?.GetTenantInfo()?.TenantId;
@@ -66,9 +74,6 @@ public class AppDbContext : DbContext
             modelBuilder.Entity<TimeRecord>()
                 .HasQueryFilter(e => e.TenantId == tenantId.Value);
         }
-
-
-
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -80,7 +85,6 @@ public class AppDbContext : DbContext
         {
             return;
         }
-
         // O interceptor será adicionado via DI no Program.cs
     }
 }

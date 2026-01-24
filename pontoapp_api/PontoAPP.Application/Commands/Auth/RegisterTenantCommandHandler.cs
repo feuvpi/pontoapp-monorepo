@@ -42,7 +42,7 @@ public class RegisterTenantCommandHandler(
             name: request.CompanyName,
             slug: slug,
             email: request.AdminEmail,
-            companyDocument: request.CompanyDocument
+            cnpj: request.CompanyDocument
         );
 
         // Criar Subscription (trial)
@@ -58,8 +58,13 @@ public class RegisterTenantCommandHandler(
             tenantId: tenant.Id,
             fullName: request.AdminName,
             email: request.AdminEmail,
+            cpf: request.AdminDocument,
+            pis: null,
             passwordHash: passwordHash
         );
+        
+        var nsrCounter = TenantNSRCounter.Create(tenant.Id);
+
 
         // Gerar tokens
         var token = jwtTokenService.GenerateAccessToken(

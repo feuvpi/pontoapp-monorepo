@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using PontoAPP.Domain.Services;
 using PontoAPP.Infrastructure.Data.Context;
 
@@ -26,14 +27,21 @@ public class NSRGenerator : INSRGenerator
         {
             _logger.LogDebug("Generating NSR for tenant: {TenantId}", tenantId);
 
-            // Chama stored procedure que faz UPDATE atomicamente
-            // A stored procedure garante:
-            // 1. Lock pessimista (FOR UPDATE)
-            // 2. Incremento atômico
-            // 3. Cria contador se não existe
-            var nsr = await _dbContext.Database
-                .SqlQueryRaw<long>("SELECT get_next_nsr({0})", tenantId)
-                .FirstAsync(cancellationToken);
+            // Usa ExecuteSqlRaw para chamar stored procedure
+            // Retorna o valor diretamente sem mapear para entity
+            var connection = _dbContext.Database.GetDbConnection();
+            await using var command = connection.CreateCommand();
+            
+            command.CommandText = "SELECT get_next_nsr(@p_tenant_id)";
+            command.Parameters.Add(new NpgsqlParameter("@p_tenant_id", tenantId));
+
+            // Garante que a conexão está aberta
+            if (connection.State != System.Data.ConnectionState.Open)
+                await connection.OpenAsync(cancellationToken);
+
+            // Executa e obtém o resultado
+            var result = await command.ExecuteScalarAsync(cancellationToken);
+            var nsr = Convert.ToInt64(result);
 
             _logger.LogInformation("Generated NSR {NSR} for tenant {TenantId}", nsr, tenantId);
 

@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PontoAPP.Domain.Entities.Identity;
-using PontoAPP.Domain.Enums;
 
 namespace PontoAPP.Infrastructure.Data.Configurations.Tenant;
 
@@ -32,9 +31,38 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasColumnName("email")
                 .IsRequired()
                 .HasMaxLength(255);
-
+            
+            // Índice no email (dentro do OwnsOne)
             email.HasIndex(e => e.Value)
-                .IsUnique();
+                .HasDatabaseName("IX_users_email");
+        });
+
+        // Value Object CPF
+        builder.OwnsOne(u => u.CPF, cpf =>
+        {
+            cpf.Property(c => c.Value)
+                .HasColumnName("cpf")
+                .IsRequired()
+                .HasMaxLength(11)
+                .IsFixedLength();
+            
+            // Índice no CPF (dentro do OwnsOne)
+            cpf.HasIndex(c => c.Value)
+                .HasDatabaseName("IX_users_cpf");
+        });
+
+        // Value Object PIS (nullable)
+        builder.OwnsOne(u => u.PIS, pis =>
+        {
+            pis.Property(p => p.Value)
+                .HasColumnName("pis")
+                .HasMaxLength(11)
+                .IsFixedLength();
+            
+            // Índice no PIS (dentro do OwnsOne, com filtro para nulls)
+            pis.HasIndex(p => p.Value)
+                .HasDatabaseName("IX_users_pis")
+                .HasFilter("\"pis\" IS NOT NULL");
         });
 
         builder.Property(u => u.PasswordHash)
@@ -66,6 +94,17 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.HiredAt);
 
+        builder.Property(u => u.MustChangePassword)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(u => u.RefreshToken)
+            .HasColumnType("text");
+
+        builder.Property(u => u.RefreshTokenExpiresAt);
+
+        builder.Property(u => u.LastLoginAt);
+
         builder.Property(u => u.CreatedAt)
             .IsRequired();
 
@@ -77,13 +116,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.UpdatedBy)
             .HasMaxLength(100);
 
-        // Relacionamento com TimeRecords (1:N)
+        // Relacionamento com TimeRecords
         builder.HasMany(u => u.TimeRecords)
             .WithOne(tr => tr.User)
             .HasForeignKey(tr => tr.UserId)
-            .OnDelete(DeleteBehavior.Restrict); // Não deletar user se tiver registros de ponto
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // Índices para queries comuns
+        // Índices simples
         builder.HasIndex(u => u.IsActive);
         builder.HasIndex(u => u.Role);
     }

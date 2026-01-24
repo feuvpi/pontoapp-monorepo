@@ -28,7 +28,7 @@ public class GetTenantByIdQueryHandler(
             Name = tenant.Name,
             Slug = tenant.Slug,
             Email = tenant.Email.Value,
-            CompanyDocument = tenant.CompanyDocument,
+            CompanyDocument = tenant.CNPJ,
             IsActive = tenant.IsActive,
             CreatedAt = tenant.CreatedAt
         };

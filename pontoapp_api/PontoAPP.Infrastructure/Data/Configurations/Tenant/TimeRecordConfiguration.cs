@@ -26,10 +26,18 @@ public class TimeRecordConfiguration : IEntityTypeConfiguration<TimeRecord>
 
         builder.HasIndex(tr => tr.UserId);
 
+        // NOVO: NSR (Portaria 671)
+        builder.Property(tr => tr.NSR)
+            .IsRequired();
+
+        // NOVO: SignatureHash (Portaria 671)
+        builder.Property(tr => tr.SignatureHash)
+            .IsRequired()
+            .HasMaxLength(256);
+
         builder.Property(tr => tr.RecordedAt)
             .IsRequired();
 
-        // Índice composto para queries de intervalo de data por usuário
         builder.HasIndex(tr => new { tr.UserId, tr.RecordedAt });
 
         builder.Property(tr => tr.Type)
@@ -55,16 +63,24 @@ public class TimeRecordConfiguration : IEntityTypeConfiguration<TimeRecord>
         builder.Property(tr => tr.Longitude)
             .HasColumnType("decimal(11,8)");
 
+        // NOVO: Rastreabilidade (Portaria 671)
+        builder.Property(tr => tr.IpAddress)
+            .HasMaxLength(45);
+
+        builder.Property(tr => tr.UserAgent)
+            .HasColumnType("text");
+
+        builder.Property(tr => tr.DeviceId);
+
+        // NOVO: Campos de ajuste
+        builder.Property(tr => tr.IsAdjustment)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(tr => tr.OriginalTimeRecordId);
+
         builder.Property(tr => tr.Notes)
-            .HasMaxLength(500);
-
-        builder.Property(tr => tr.EditReason)
-            .HasMaxLength(500);
-
-        builder.Property(tr => tr.EditedAt);
-
-        builder.Property(tr => tr.EditedBy)
-            .HasMaxLength(100);
+            .HasColumnType("text");
 
         builder.Property(tr => tr.CreatedAt)
             .IsRequired();
@@ -77,10 +93,18 @@ public class TimeRecordConfiguration : IEntityTypeConfiguration<TimeRecord>
         builder.Property(tr => tr.UpdatedBy)
             .HasMaxLength(100);
 
-        // Índice para queries de relatórios por data
-        builder.HasIndex(tr => tr.RecordedAt);
+        // NOVO: Índice único NSR por tenant (Portaria 671)
+        builder.HasIndex(tr => new { tr.TenantId, tr.NSR })
+            .HasDatabaseName("IX_time_records_tenant_nsr")
+            .IsUnique();
 
-        // Índice composto para queries de registros pendentes por tenant
+        // NOVO: Relacionamento com registro original (se for ajuste)
+        builder.HasOne(tr => tr.OriginalTimeRecord)
+            .WithMany()
+            .HasForeignKey(tr => tr.OriginalTimeRecordId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(tr => tr.RecordedAt);
         builder.HasIndex(tr => new { tr.TenantId, tr.Status });
     }
 }

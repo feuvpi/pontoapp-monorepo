@@ -1,4 +1,3 @@
-// PontoAPP.Domain/Services/IACJEFGenerator.cs
 using PontoAPP.Domain.Models.Reports;
 
 namespace PontoAPP.Domain.Services;

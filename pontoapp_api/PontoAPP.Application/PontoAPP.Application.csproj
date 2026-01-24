@@ -15,12 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="PGE.Modelo.ERP">
-      <HintPath>..\..\pge.modelos\PGE.Modelo.ERP\bin\Debug\net8.0\PGE.Modelo.ERP.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\PontoAPP.Domain\PontoAPP.Domain.csproj" />
     <ProjectReference Include="..\PontoAPP.Infrastructure\PontoAPP.Infrastructure.csproj" />
   </ItemGroup>

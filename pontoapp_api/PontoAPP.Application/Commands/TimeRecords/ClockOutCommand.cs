@@ -11,4 +11,7 @@ public class ClockOutCommand : IRequest<TimeRecordResponse>
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? Notes { get; set; }
+    public string? IpAddress { get; set; }
+    public string? UserAgent { get; set; }
+    public string? DeviceId { get; set; } // ← Adicionar (estava faltando)
 }

@@ -25,5 +25,5 @@ public class CreateTenantRequest
     /// Company document (CNPJ in Brazil)
     /// Optional during registration
     /// </summary>
-    public string? CompanyDocument { get; set; }
+    public string CompanyDocument { get; set; } = string.Empty;
 }

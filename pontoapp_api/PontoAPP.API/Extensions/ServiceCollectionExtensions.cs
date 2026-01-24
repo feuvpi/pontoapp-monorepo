@@ -73,6 +73,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISignatureGenerator, SignatureGenerator>();
         // Removido: ITenantSchemaService
         services.AddScoped<IDomainEventService, DomainEventService>();
+        
+        services.AddScoped<IAFDGenerator, AFDGenerator>();
+        services.AddScoped<IACJEFGenerator, ACJEFGenerator>();
+        services.AddScoped<IEspelhoPontoGenerator, EspelhoPontoGenerator>();
+        services.AddScoped<ICRPGenerator, CRPGenerator>();
 
         return services;
     }

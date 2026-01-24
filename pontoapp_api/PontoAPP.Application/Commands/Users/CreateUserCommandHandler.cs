@@ -46,6 +46,8 @@ public class CreateUserCommandHandler(
             tenantId: request.TenantId,
             fullName: request.FullName,
             email: request.Email,
+            cpf: request.CPF,
+            pis: request.PIS,
             passwordHash: passwordHash,
             role: role,
             employeeCode: request.EmployeeCode,
@@ -54,7 +56,12 @@ public class CreateUserCommandHandler(
 
         if (request.HiredAt.HasValue)
         {
-            user.SetHiredDate(request.HiredAt.Value);
+            // Convert to UTC if it's not already
+            var hiredAtUtc = request.HiredAt.Value.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(request.HiredAt.Value, DateTimeKind.Utc)
+                : request.HiredAt.Value.ToUniversalTime();
+    
+            user.SetHiredDate(hiredAtUtc);
         }
 
         await userRepository.AddAsync(user, cancellationToken);

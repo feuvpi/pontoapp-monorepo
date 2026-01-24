@@ -5,6 +5,7 @@ using PontoAPP.Application.Exceptions;
 using PontoAPP.Domain.Entities.TimeTracking;
 using PontoAPP.Domain.Enums;
 using PontoAPP.Domain.Repositories;
+using PontoAPP.Domain.Services;
 
 namespace PontoAPP.Application.Commands.TimeRecords;
 
@@ -12,6 +13,8 @@ public class ClockInCommandHandler(
     ITimeRecordRepository timeRecordRepository,
     IUserRepository userRepository,
     IDeviceRepository deviceRepository,
+    INSRGenerator nsrGenerator,
+    ISignatureGenerator signatureGenerator,
     ILogger<ClockInCommandHandler> logger)
     : IRequestHandler<ClockInCommand, TimeRecordResponse>
 {
@@ -34,7 +37,7 @@ public class ClockInCommandHandler(
             throw new BusinessException("Usuário inativo. Não é possível registrar ponto.");
         }
 
-        // NOVO: Validar dispositivo
+        // Validar dispositivo
         if (string.IsNullOrWhiteSpace(request.DeviceId))
         {
             throw new ValidationException("Device ID é obrigatório.");
@@ -90,32 +93,56 @@ public class ClockInCommandHandler(
             throw new ValidationException("Tipo de autenticação inválido.");
         }
 
+        // ========== PORTARIA 671: NSR + HASH ==========
+        
+        // 1. Gerar NSR (atômico)
+        var nsr = await nsrGenerator.GenerateNextAsync(request.TenantId, cancellationToken);
+        logger.LogInformation("Generated NSR {NSR} for user {UserId}", nsr, request.UserId);
+
+        // 2. Gerar hash SHA-256
+        var hash = signatureGenerator.GenerateHash(
+            nsr: nsr,
+            tenantId: request.TenantId,
+            userId: user.Id,
+            cpf: user.CPF.Value,
+            recordedAt: DateTime.UtcNow,
+            recordType: RecordType.ClockIn.ToString());
+
+        // ========== FIM PORTARIA 671 ==========
+
         // Criar registro
         var timeRecord = TimeRecord.Create(
             tenantId: request.TenantId,
             userId: request.UserId,
+            nsr: nsr,                         // ← NSR
             type: RecordType.ClockIn,
-            authenticationType: authType,
+            //authenticationType: authType,
+            signatureHash: hash,              // ← Hash
             latitude: request.Latitude,
             longitude: request.Longitude,
+            ipAddress: request.IpAddress,     // ← Opcional
+            userAgent: request.UserAgent,     // ← Opcional
+            deviceId: device?.Id,             // ← DeviceId
             notes: request.Notes
         );
 
         await timeRecordRepository.AddAsync(timeRecord, cancellationToken);
         await timeRecordRepository.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("Clock-in registered: {RecordId} for user {UserId} from device {DeviceId}", 
-            timeRecord.Id, request.UserId, request.DeviceId);
+        logger.LogInformation("Clock-in registered: {RecordId} (NSR: {NSR}) for user {UserId} from device {DeviceId}", 
+            timeRecord.Id, nsr, request.UserId, request.DeviceId);
 
         return new TimeRecordResponse
         {
             Id = timeRecord.Id,
             UserId = timeRecord.UserId,
             UserName = user.FullName,
+            NSR = nsr,                        // ← Incluir NSR no response
             RecordedAt = timeRecord.RecordedAt,
             Type = timeRecord.Type.ToString(),
             Status = timeRecord.Status.ToString(),
             AuthenticationType = timeRecord.AuthenticationType.ToString(),
+            SignatureHash = hash,             // ← Incluir hash no response
             Latitude = timeRecord.Latitude,
             Longitude = timeRecord.Longitude,
             Notes = timeRecord.Notes,
