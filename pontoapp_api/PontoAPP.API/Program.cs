@@ -165,12 +165,15 @@ app.UseHttpsRedirection();
 app.UseResponseCompression();
 app.UseCors("DefaultCorsPolicy");
 
-
+// ✅ ORDEM CORRETA DO MIDDLEWARE (CRÍTICO!)
+// 1. Authentication - valida JWT e popula User.Claims
 app.UseAuthentication();
-app.UseAuthorization();
 
-
+// 2. TenantResolution - lê tenantId dos claims e popula TenantAccessor
 app.UseMiddleware<TenantResolutionMiddleware>();
+
+// 3. Authorization - verifica permissões com tenant já resolvido
+app.UseAuthorization();
 
 app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {
