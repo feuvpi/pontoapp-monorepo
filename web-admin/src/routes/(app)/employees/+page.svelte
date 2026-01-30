@@ -29,17 +29,21 @@
 	let loadingTimeline = $state(false);
 
 	// Filtered users
-	const filteredUsers = $derived(
-		users.filter((user) => {
-			const searchLower = searchTerm.toLowerCase();
-			return (
-				user.fullName.toLowerCase().includes(searchLower) ||
-				user.email.toLowerCase().includes(searchLower) ||
-				user.employeeCode?.toLowerCase().includes(searchLower) ||
-				user.department?.toLowerCase().includes(searchLower)
-			);
-		})
-	);
+const filteredUsers = $derived(
+    users.filter((user, index) => {
+        console.log(`Filtering user ${index}:`, user);
+        console.log(`User ${index} fullName:`, user.fullName);
+        
+        if (!user || typeof user.fullName !== 'string') {
+            console.warn(`User ${index} has invalid fullName:`, user);
+            return false;
+        }
+        
+        const searchLower = searchTerm.toLowerCase();
+        const userName = user.fullName.toLowerCase();
+        return userName.includes(searchLower);
+    })
+);
 
 	onMount(() => {
 		loadUsers();
@@ -66,15 +70,22 @@
 		showModal = true;
 	}
 
-	function handleSuccess(user: User) {
-		if (editingUser) {
-			// Update existing
-			users = users.map((u) => (u.id === user.id ? user : u));
-		} else {
-			// Add new
-			users = [user, ...users];
-		}
-	}
+
+function handleSuccess(response: any) { // Change parameter name to response
+    console.log('API Response:', response); 
+    
+    // Extract the user data from the response
+    const user = response.data; // <-- THIS IS THE FIX!
+    console.log('User data:', user);
+    
+    if (editingUser) {
+        // Update existing
+        users = users.map((u) => (u.id === user.id ? user : u));
+    } else {
+        // Add new
+        users = [user, ...users];
+    }
+}
 
 	async function handleDeactivate(event: CustomEvent<User>) {
 		const user = event.detail;

@@ -73,7 +73,9 @@ export const authService = {
 			fullName: response.user.fullName,
 			role: response.user.role as UserRole,
 			mustChangePassword: response.user.mustChangePassword,
-			isActive: true,
+			isActive: response.user.isActive,
+			employeeCode: response.user.employeeCode,
+			department: response.user.department,
 			createdAt: new Date().toISOString()
 		});
 
